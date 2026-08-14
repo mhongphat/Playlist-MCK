@@ -269,8 +269,12 @@ function setStatus(text,error=false){
 }
 function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function fmt(v){return Number.isFinite(v)?Math.floor(v/60)+":"+String(Math.floor(v%60)).padStart(2,"0"):"0:00";}
-function mediaURL(id){
-  return "https://www.googleapis.com/drive/v3/files/"+encodeURIComponent(id)+"?alt=media&key="+encodeURIComponent(API_KEY);
+function mediaURL(track){
+  // TEST MODE:
+  // Prefer Google's browser download link when Drive exposes it.
+  // Fall back to the Drive API media endpoint if no webContentLink exists.
+  if(track && track.webContentLink) return track.webContentLink;
+  return `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(track.id)}?alt=media&key=${encodeURIComponent(API_KEY)}`;
 }
 
 function render(){
@@ -297,7 +301,7 @@ function loadInto(video,track){
   video.volume=0;
   video.removeAttribute("src");
   video.load();
-  video.src=mediaURL(track.id);
+  video.src=mediaURL(track);
   video.preload="metadata";
   video.load();
 }
@@ -334,6 +338,11 @@ function selectTrack(i,autoplay=false){
   active.muted=true;
   active.volume=0;
   loadInto(active,tracks[current],false);
+  if(tracks[current].webContentLink){
+    setStatus("Đang thử webContentLink của Google Drive…",false,"loading");
+  }else{
+    setStatus("Đang thử Drive API media URL…",false,"loading");
+  }
 
   if(autoplay){
     playbackUnlocked=true;
@@ -492,7 +501,9 @@ function mediaDiagnostics(video,label){
       : e&&e.code===3 ? "Trình duyệt không đọc được video"
       : e&&e.code===4 ? "Google Drive không cho phép phát media"
       : "Không thể phát video";
-    setStatus("❌ "+msg+" · "+label,true);
+    const t=tracks[current];
+    const sourceType=t&&t.webContentLink ? "webContentLink" : "Drive API";
+    setStatus("❌ "+msg+" · "+label+" · nguồn: "+sourceType,true);
   });
   video.addEventListener("waiting",()=>{if(video===active)setStatus("Đang tải video…",false,"loading");});
   video.addEventListener("stalled",()=>{if(video===active)setStatus("Đang chờ dữ liệu video…",false,"loading");});
@@ -543,6 +554,11 @@ tapStart.addEventListener("click",unlockAndPlay);
 tapStart.addEventListener("touchend",e=>{e.preventDefault();unlockAndPlay();},{passive:false});
 
 
+function streamSourceLabel(track){
+  if(!track) return "unknown";
+  return track.webContentLink ? "webContentLink" : "Drive API media URL";
+}
+
 async function loadPlaylist(){
   if(location.protocol==="file:"){
     setStatus("⚠ Hãy mở bằng GitHub Pages (https://...) hoặc localhost, không mở file:// trực tiếp.",true);
@@ -584,7 +600,7 @@ async function loadPlaylist(){
       return;
     }
 
-    setStatus("✓ "+tracks.length+" video · Chạm TAP TO PLAY để bắt đầu",false,"ok");
+    setStatus("✓ "+tracks.length+" video · Stream TEST · Chạm TAP TO PLAY",false,"ok");
     selectTrack(0,false);
     tapStart.classList.remove("hidden");
 
