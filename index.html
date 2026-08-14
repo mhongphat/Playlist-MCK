@@ -140,6 +140,7 @@ input[type=range]::-webkit-slider-thumb{
   border:1px solid rgba(255,255,255,.05);color:var(--muted);font-size:10px;line-height:1.5
 }
 .source-status.error{color:#efabb2;background:rgba(165,30,49,.08);border-color:rgba(208,51,71,.24)}
+.source-status.ok{color:#c9d9c9}.source-status.loading{color:#cfc3bb}
 
 .footer{
   width:100%;display:flex;justify-content:center;align-items:center;text-align:center;
@@ -159,6 +160,7 @@ input[type=range]::-webkit-slider-thumb{
 }
 @media(max-width:560px){
   .visual{aspect-ratio:16/10}
+  .visual video{touch-action:manipulation}
   .tap-start{padding:12px 16px;font-size:9px}
 
   .app{padding:10px 10px 5px}.card{border-radius:18px}
@@ -251,13 +253,14 @@ input[type=range]::-webkit-slider-thumb{
    CHỈ CẦN THAY API_KEY.
    KHÔNG CẦN NHẬP API KEY / FOLDER TRÊN WEBSITE.
    ========================================================== */
-const API_KEY = "ABC";
+const API_KEY = "AIzaSyBv2xnFQxz5P6PEosKNKaO3BrV6a_pSfDY";
 const FOLDER_ID = "1ckf_j0cc-87VPG186w2Ilm003pt0ifjR";
 /* ========================================================== */
 
 const A=document.getElementById("videoA"),B=document.getElementById("videoB");
 const seek=document.getElementById("seek"),volume=document.getElementById("volume");
 const statusEl=document.getElementById("status");
+const tapStart=document.getElementById("tapStart");
 let tracks=[],current=0,active=A,buffer=B,shuffle=false,repeat=false,transitioning=false;
 
 function setStatus(text,error=false){
@@ -310,53 +313,93 @@ function getNext(){
 }
 
 function preload(){
-  if(tracks.length)loadInto(buffer,tracks[getNext()]);
+  if(!tracks.length || !playbackUnlocked)return;
+  if(window.matchMedia("(max-width:560px)").matches && active.readyState<3)return;
+  loadInto(buffer,tracks[getNext()]);
 }
-
 function selectTrack(i,autoplay=false){
   if(!tracks.length)return;
 
-  // Silence the inactive/preload player before changing tracks.
   buffer.pause();
   buffer.muted=true;
   buffer.volume=0;
+  buffer.removeAttribute("src");
+  buffer.load();
 
   current=(i+tracks.length)%tracks.length;
   document.getElementById("title").textContent=tracks[current].name;
   render();
 
-  active.muted=false;
-  active.volume=Number(volume.value);
-  loadInto(active,tracks[current]);
-  active.muted=false;
-  active.volume=Number(volume.value);
+  active.pause();
+  active.muted=true;
+  active.volume=0;
+  loadInto(active,tracks[current],false);
 
-  preload();
-
-  if(autoplay)active.play().catch(()=>setStatus("Bấm ▶ để bắt đầu phát."));
+  if(autoplay){
+    playbackUnlocked=true;
+    tapStart.classList.add("hidden");
+    active.muted=false;
+    active.volume=Number(volume.value);
+    active.play().then(()=>{
+      setStatus("✓ Đang phát · "+tracks[current].name,false,"ok");
+      preload();
+    }).catch(()=>{
+      tapStart.classList.remove("hidden");
+      setStatus("⚠ Chạm TAP TO PLAY để bắt đầu phát.",true);
+    });
+  }
 }
-
 function crossfade(){
   if(transitioning || !tracks.length)return;
-  transitioning=true;
 
-  const n=getNext(), incoming=buffer, outgoing=active;
+  const n=getNext();
+
+  // Mobile: prefer a reliable single-player switch if the next stream isn't buffered.
+  if(window.matchMedia("(max-width:560px)").matches && buffer.readyState<3){
+    transitioning=true;
+    const old=active;
+    old.pause();
+    old.muted=true;
+    old.volume=0;
+
+    active=buffer;
+    buffer=old;
+    current=n;
+    document.getElementById("title").textContent=tracks[current].name;
+    render();
+
+    loadInto(active,tracks[current],false);
+    active.muted=false;
+    active.volume=Number(volume.value);
+    active.play().then(()=>{
+      transitioning=false;
+      setStatus("✓ Đang phát · "+tracks[current].name,false,"ok");
+      preload();
+    }).catch(()=>{
+      transitioning=false;
+      active.muted=true;
+      active.volume=0;
+      tapStart.classList.remove("hidden");
+      setStatus("⚠ Không thể phát bài kế tiếp trên thiết bị này.",true);
+    });
+    return;
+  }
+
+  transitioning=true;
+  const incoming=buffer, outgoing=active;
 
   incoming.pause();
   incoming.muted=false;
   incoming.volume=0;
-  incoming.currentTime=0;
 
   const start=()=>{
     outgoing.pause();
-
     incoming.muted=false;
     incoming.volume=0;
 
     incoming.play().then(()=>{
       incoming.classList.add("active");
       outgoing.classList.remove("active");
-
       active=incoming;
       buffer=outgoing;
       current=n;
@@ -365,31 +408,26 @@ function crossfade(){
       render();
 
       const max=Number(volume.value);
-      const started=performance.now();
-      const duration=720;
-
+      const t0=performance.now();
       const fade=now=>{
-        const p=Math.min(1,(now-started)/duration);
+        const p=Math.min(1,(now-t0)/720);
         active.volume=max*p;
         outgoing.volume=max*(1-p);
-
-        if(p<1){
-          requestAnimationFrame(fade);
-        }else{
+        if(p<1) requestAnimationFrame(fade);
+        else{
           outgoing.pause();
           outgoing.muted=true;
           outgoing.volume=0;
           outgoing.removeAttribute("src");
           outgoing.load();
-
           active.muted=false;
           active.volume=max;
           transitioning=false;
+          setStatus("✓ Đang phát · "+tracks[current].name,false,"ok");
           preload();
         }
       };
       requestAnimationFrame(fade);
-
     }).catch(()=>{
       transitioning=false;
       incoming.pause();
@@ -399,7 +437,7 @@ function crossfade(){
     });
   };
 
-  if(incoming.readyState>=3)start();
+  if(incoming.readyState>=3) start();
   else{
     incoming.addEventListener("canplay",start,{once:true});
     incoming.load();
@@ -415,7 +453,23 @@ function previousTrack(){
   if(active.currentTime>5){active.currentTime=0;return}
   selectTrack(current-1,true);
 }
-function togglePlay(){active.paused?active.play().catch(()=>{}):active.pause();}
+async function togglePlay(){
+  if(active.paused){
+    playbackUnlocked=true;
+    try{
+      active.muted=false;
+      active.volume=Number(volume.value);
+      await active.play();
+      tapStart.classList.add("hidden");
+      preload();
+    }catch(e){
+      tapStart.classList.remove("hidden");
+      setStatus("⚠ Chạm TAP TO PLAY để bắt đầu phát.",true);
+    }
+  }else{
+    active.pause();
+  }
+}
 function toggleShuffle(){shuffle=!shuffle;document.getElementById("shuffle").classList.toggle("active",shuffle);preload();}
 function toggleRepeat(){repeat=!repeat;document.getElementById("repeat").classList.toggle("active",repeat);}
 
@@ -427,41 +481,62 @@ function update(){
   document.getElementById("duration").textContent=fmt(active.duration);
 }
 seek.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(seek.value)/100*active.duration;});
-volume.addEventListener("input",()=>{active.volume=Number(volume.value);buffer.volume=Number(volume.value);});
+volume.addEventListener("input",()=>{active.volume=Number(volume.value);buffer.muted=true;buffer.volume=0;});
 A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);
 A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);
+function mediaDiagnostics(video,label){
+  video.addEventListener("error",()=>{
+    if(video!==active)return;
+    const e=video.error;
+    const msg=e&&e.code===2 ? "Mạng/Google Drive bị gián đoạn"
+      : e&&e.code===3 ? "Trình duyệt không đọc được video"
+      : e&&e.code===4 ? "Google Drive không cho phép phát media"
+      : "Không thể phát video";
+    setStatus("❌ "+msg+" · "+label,true);
+  });
+  video.addEventListener("waiting",()=>{if(video===active)setStatus("Đang tải video…",false,"loading");});
+  video.addEventListener("stalled",()=>{if(video===active)setStatus("Đang chờ dữ liệu video…",false,"loading");});
+  video.addEventListener("playing",()=>{if(video===active)setStatus("✓ Đang phát · "+tracks[current].name,false,"ok");});
+}
+mediaDiagnostics(A,"Player A");
+mediaDiagnostics(B,"Player B");
+
 A.addEventListener("play",()=>{
   if(active===A){
     document.getElementById("play").textContent="⏸";
     tapStart.classList.add("hidden");
+    preload();
   }
 });
 B.addEventListener("play",()=>{
   if(active===B){
     document.getElementById("play").textContent="⏸";
     tapStart.classList.add("hidden");
+    preload();
   }
 });
 A.addEventListener("pause",()=>{if(active===A)document.getElementById("play").textContent="▶";});
 B.addEventListener("pause",()=>{if(active===B)document.getElementById("play").textContent="▶";});
+
 document.getElementById("play").onclick=togglePlay;
 document.getElementById("next").onclick=nextTrack;
 document.getElementById("prev").onclick=previousTrack;
 document.getElementById("shuffle").onclick=toggleShuffle;
 document.getElementById("repeat").onclick=toggleRepeat;
 document.getElementById("search").oninput=render;
-const tapStart=document.getElementById("tapStart");
-let playbackUnlocked=false;
 
 async function unlockAndPlay(){
   playbackUnlocked=true;
-  tapStart.classList.add("hidden");
   try{
     active.muted=false;
     active.volume=Number(volume.value);
     await active.play();
+    tapStart.classList.add("hidden");
+    setStatus("✓ Đang phát · "+tracks[current].name,false,"ok");
+    preload();
   }catch(e){
-    setStatus("Bấm ▶ trong player để bắt đầu phát.");
+    tapStart.classList.remove("hidden");
+    setStatus("⚠ Thiết bị chưa cho phát. Chạm nút ▶ trong player.",true);
   }
 }
 tapStart.addEventListener("click",unlockAndPlay);
@@ -509,8 +584,9 @@ async function loadPlaylist(){
       return;
     }
 
-    setStatus("✓ "+tracks.length+" video · Sẵn sàng phát");
+    setStatus("✓ "+tracks.length+" video · Chạm TAP TO PLAY để bắt đầu",false,"ok");
     selectTrack(0,false);
+    tapStart.classList.remove("hidden");
 
   }catch(err){
     console.error(err);
@@ -519,10 +595,11 @@ async function loadPlaylist(){
 }
 
 // Initial dual-player safety: only the visible player may have audio.
-A.muted=false;
-A.volume=Number(volume.value);
+A.muted=true;
+A.volume=0;
 B.muted=true;
 B.volume=0;
+A.pause();
 B.pause();
 
 window.addEventListener("DOMContentLoaded",loadPlaylist);
