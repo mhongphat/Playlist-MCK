@@ -61,6 +61,17 @@ button,input{font:inherit}.app{width:min(1480px,100%);margin:auto;padding:30px 3
   opacity:0;transition:opacity .72s cubic-bezier(.22,.8,.24,1)
 }
 .visual video.active{opacity:1}
+
+.tap-start{
+  position:absolute;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);
+  border:1px solid rgba(243,234,223,.2);border-radius:999px;padding:13px 18px;
+  color:var(--cream);background:rgba(8,8,8,.58);backdrop-filter:blur(14px);
+  font-size:10px;letter-spacing:.16em;cursor:pointer;
+  box-shadow:0 18px 50px rgba(0,0,0,.4);transition:opacity .25s,transform .25s,background .25s
+}
+.tap-start:hover{background:rgba(165,30,49,.42);transform:translate(-50%,-50%) scale(1.03)}
+.tap-start.hidden{opacity:0;pointer-events:none}
+
 .visual-badge{
   position:absolute;z-index:7;top:16px;left:16px;
   padding:8px 11px;border:1px solid rgba(255,255,255,.12);border-radius:999px;
@@ -147,6 +158,9 @@ input[type=range]::-webkit-slider-thumb{
   .header{margin-bottom:15px}
 }
 @media(max-width:560px){
+  .visual{aspect-ratio:16/10}
+  .tap-start{padding:12px 16px;font-size:9px}
+
   .app{padding:10px 10px 5px}.card{border-radius:18px}
   .monogram{width:42px;height:42px;border-radius:13px}.brand-title{font-size:20px}
   .eyebrow{font-size:7px}.header-right{display:none}
@@ -177,6 +191,7 @@ input[type=range]::-webkit-slider-thumb{
 <section class="card">
   <div class="visual">
     <span class="visual-badge">HVL / NOW PLAYING</span>
+    <button class="tap-start" id="tapStart">▶&nbsp; TAP TO PLAY</button>
     <video id="videoA" class="active" playsinline preload="metadata" controls></video>
     <video id="videoB" playsinline preload="metadata" controls muted></video>
     <span class="corner">VISUAL ALBUM · 2026</span>
@@ -219,7 +234,7 @@ input[type=range]::-webkit-slider-thumb{
   </div>
 
   <div class="playlist" id="playlist"></div>
-  <div class="source-status" id="status">Đang kết nối với Google Drive…</div>
+  <div class="source-status" id="status">Đang kết nối …</div>
 </aside>
 
 </main>
@@ -415,8 +430,18 @@ seek.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(
 volume.addEventListener("input",()=>{active.volume=Number(volume.value);buffer.volume=Number(volume.value);});
 A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);
 A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);
-A.addEventListener("play",()=>{if(active===A)document.getElementById("play").textContent="⏸";});
-B.addEventListener("play",()=>{if(active===B)document.getElementById("play").textContent="⏸";});
+A.addEventListener("play",()=>{
+  if(active===A){
+    document.getElementById("play").textContent="⏸";
+    tapStart.classList.add("hidden");
+  }
+});
+B.addEventListener("play",()=>{
+  if(active===B){
+    document.getElementById("play").textContent="⏸";
+    tapStart.classList.add("hidden");
+  }
+});
 A.addEventListener("pause",()=>{if(active===A)document.getElementById("play").textContent="▶";});
 B.addEventListener("pause",()=>{if(active===B)document.getElementById("play").textContent="▶";});
 document.getElementById("play").onclick=togglePlay;
@@ -425,8 +450,30 @@ document.getElementById("prev").onclick=previousTrack;
 document.getElementById("shuffle").onclick=toggleShuffle;
 document.getElementById("repeat").onclick=toggleRepeat;
 document.getElementById("search").oninput=render;
+const tapStart=document.getElementById("tapStart");
+let playbackUnlocked=false;
+
+async function unlockAndPlay(){
+  playbackUnlocked=true;
+  tapStart.classList.add("hidden");
+  try{
+    active.muted=false;
+    active.volume=Number(volume.value);
+    await active.play();
+  }catch(e){
+    setStatus("Bấm ▶ trong player để bắt đầu phát.");
+  }
+}
+tapStart.addEventListener("click",unlockAndPlay);
+tapStart.addEventListener("touchend",e=>{e.preventDefault();unlockAndPlay();},{passive:false});
+
 
 async function loadPlaylist(){
+  if(location.protocol==="file:"){
+    setStatus("⚠ Hãy mở bằng GitHub Pages (https://...) hoặc localhost, không mở file:// trực tiếp.",true);
+    return;
+  }
+
   if(!API_KEY || API_KEY==="DAN_API_KEY_CUA_BAN_VAO_DAY"){
     setStatus("⚠ Chưa nhập API_KEY trong phần CONFIG của file HTML.",true);
     return;
