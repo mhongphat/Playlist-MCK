@@ -171,6 +171,199 @@ input[type=range]::-webkit-slider-thumb{
   .volume{width:74px;margin-left:0}.side{padding:14px}.playlist{max-height:370px}
   .footer{padding-top:18px;font-size:8px;letter-spacing:.08em}.footer:before,.footer:after{width:22px;margin:0 8px}
 }
+
+/* ---------- MOBILE POLISH ---------- */
+@media (max-width: 560px){
+  html,body{width:100%;overflow-x:hidden}
+  body{
+    min-height:100svh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .app{
+    width:100%;
+    max-width:100%;
+    margin:0;
+    padding:
+      max(10px,env(safe-area-inset-top))
+      10px
+      max(8px,env(safe-area-inset-bottom));
+  }
+  .header{
+    min-height:48px;
+    margin-bottom:10px;
+  }
+  .identity{gap:10px;min-width:0}
+  .monogram{flex:0 0 40px;width:40px;height:40px;border-radius:12px}
+  .brand-title{
+    font-size:19px;
+    line-height:1.05;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:calc(100vw - 75px);
+  }
+  .eyebrow{
+    margin-top:4px;
+    font-size:6.5px;
+    letter-spacing:.16em;
+    white-space:nowrap;
+  }
+
+  .shell{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+  }
+  .card{
+    width:100%;
+    border-radius:17px;
+    box-shadow:0 20px 55px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.025);
+  }
+
+  .visual{
+    width:100%;
+    aspect-ratio:16/10;
+    min-height:0;
+  }
+  .visual video{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .visual-badge{
+    top:10px;
+    left:10px;
+    padding:6px 8px;
+    font-size:7px;
+    letter-spacing:.14em;
+  }
+  .corner{right:10px;bottom:10px;font-size:6.5px}
+  .tap-start{
+    max-width:calc(100% - 40px);
+    white-space:nowrap;
+    padding:11px 14px;
+    font-size:8px;
+  }
+
+  .now{
+    padding:13px 13px 4px;
+    gap:8px;
+    align-items:center;
+  }
+  .now-title{min-width:0}
+  .now-title h2{
+    font-size:19px;
+    line-height:1.12;
+  }
+  .now-title p{
+    margin-top:5px;
+    font-size:9px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .track-number{
+    flex:0 0 auto;
+    font-size:20px;
+  }
+
+  .controls{
+    padding:8px 12px 13px;
+  }
+  .timeline{
+    grid-template-columns:34px minmax(0,1fr) 34px;
+    gap:7px;
+    font-size:8px;
+  }
+  input[type=range]{height:4px}
+  .actions{
+    gap:7px;
+    margin-top:12px;
+    flex-wrap:nowrap;
+  }
+  .btn{
+    flex:0 0 auto;
+    width:37px;
+    height:37px;
+    font-size:13px;
+  }
+  .play-btn{
+    width:51px;
+    height:51px;
+    font-size:16px;
+  }
+  .volume{
+    flex:1 1 auto;
+    min-width:62px;
+    max-width:95px;
+    gap:5px;
+    font-size:12px;
+  }
+
+  .side{
+    padding:12px;
+    min-height:0;
+  }
+  .side-top{padding:1px 2px}
+  .side-title{font-size:18px}
+  .count{font-size:8px}
+  .search{
+    height:40px;
+    margin:10px 0 8px;
+    border-radius:11px;
+  }
+  .search input{font-size:12px}
+  .playlist{
+    width:100%;
+    max-height:43svh;
+    min-height:120px;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .item{
+    grid-template-columns:27px minmax(0,1fr) 14px;
+    gap:7px;
+    min-height:46px;
+    padding:9px 8px;
+    border-radius:10px;
+  }
+  .song{font-size:11px}
+  .num{font-size:8px}
+  .source-status{
+    margin-top:8px;
+    font-size:9px;
+    padding:9px 10px;
+  }
+
+  .footer{
+    min-height:52px;
+    padding:17px 4px 7px;
+    font-size:7px;
+    letter-spacing:.06em;
+    line-height:1.5;
+    white-space:normal;
+  }
+  .footer:before,.footer:after{
+    width:18px;
+    min-width:18px;
+    margin:0 7px;
+  }
+}
+
+/* Very small phones */
+@media (max-width:380px){
+  .app{padding-left:7px;padding-right:7px}
+  .brand-title{font-size:17px}
+  .monogram{width:36px;height:36px;flex-basis:36px}
+  .eyebrow{font-size:5.8px}
+  .btn{width:34px;height:34px}
+  .play-btn{width:46px;height:46px}
+  .actions{gap:5px}
+  .volume{max-width:76px}
+  .now-title h2{font-size:17px}
+  .footer:before,.footer:after{display:none}
+}
 </style>
 </head>
 
@@ -250,11 +443,20 @@ input[type=range]::-webkit-slider-thumb{
 <script>
 /* ==========================================================
    HVL CONFIG
-   CHỈ CẦN THAY API_KEY.
+   CHỈ CẦN THAY API_KEY. STREAM PROXY ĐÃ CẤU HÌNH SẴN.
    KHÔNG CẦN NHẬP API KEY / FOLDER TRÊN WEBSITE.
    ========================================================== */
 const API_KEY = "AIzaSyBv2xnFQxz5P6PEosKNKaO3BrV6a_pSfDY";
 const FOLDER_ID = "1ckf_j0cc-87VPG186w2Ilm003pt0ifjR";
+
+/*
+  STREAM PROXY:
+  Google Drive is reliable for listing files, but its browser download
+  endpoints are not a dependable HTML5 streaming origin on mobile.
+  Cloudflare Worker đã được cấu hình sẵn cho playlist này.
+  Example: https://hvl-drive-stream.yourname.workers.dev
+*/
+const STREAM_PROXY_BASE = "https://hvl-drive-stream.mhongphat.workers.dev";
 /* ========================================================== */
 
 const A=document.getElementById("videoA"),B=document.getElementById("videoB");
@@ -263,18 +465,15 @@ const statusEl=document.getElementById("status");
 const tapStart=document.getElementById("tapStart");
 let tracks=[],current=0,active=A,buffer=B,shuffle=false,repeat=false,transitioning=false;
 
-function setStatus(text,error=false){
+function setStatus(text,error=false,state=""){
   statusEl.textContent=text;
-  statusEl.className="source-status"+(error?" error":"");
+  statusEl.className="source-status"+(error?" error":state?" "+state:"");
 }
 function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function fmt(v){return Number.isFinite(v)?Math.floor(v/60)+":"+String(Math.floor(v%60)).padStart(2,"0"):"0:00";}
 function mediaURL(track){
-  // TEST MODE:
-  // Prefer Google's browser download link when Drive exposes it.
-  // Fall back to the Drive API media endpoint if no webContentLink exists.
-  if(track && track.webContentLink) return track.webContentLink;
-  return `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(track.id)}?alt=media&key=${encodeURIComponent(API_KEY)}`;
+  return STREAM_PROXY_BASE.replace(/\/$/,"") +
+    "/stream/" + encodeURIComponent(track.id);
 }
 
 function render(){
@@ -502,7 +701,9 @@ function mediaDiagnostics(video,label){
       : e&&e.code===4 ? "Google Drive không cho phép phát media"
       : "Không thể phát video";
     const t=tracks[current];
-    const sourceType=t&&t.webContentLink ? "webContentLink" : "Drive API";
+    const sourceType=(STREAM_PROXY_BASE && !STREAM_PROXY_BASE.includes("PASTE_YOUR_WORKER_URL_HERE"))
+      ? "Cloudflare Stream Proxy"
+      : (t&&t.webContentLink ? "webContentLink" : "Drive API");
     setStatus("❌ "+msg+" · "+label+" · nguồn: "+sourceType,true);
   });
   video.addEventListener("waiting",()=>{if(video===active)setStatus("Đang tải video…",false,"loading");});
@@ -600,7 +801,11 @@ async function loadPlaylist(){
       return;
     }
 
-    setStatus("✓ "+tracks.length+" video · Stream TEST · Chạm TAP TO PLAY",false,"ok");
+    if(STREAM_PROXY_BASE.includes("PASTE_YOUR_WORKER_URL_HERE")){
+      setStatus("✓ "+tracks.length+" video · Cần cấu hình Stream Proxy",false,"loading");
+    }else{
+      setStatus("✓ "+tracks.length+" video · Stream Proxy · Chạm TAP TO PLAY",false,"ok");
+    }
     selectTrack(0,false);
     tapStart.classList.remove("hidden");
 
