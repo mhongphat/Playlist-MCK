@@ -50,6 +50,76 @@ button,input{touch-action:manipulation}
 @media(max-width:560px){.video-ui{padding:48px 10px 10px}.video-progress{height:4px}.video-progress:hover,.video-progress:active{height:5px}.video-buttons{gap:6px}.vbtn{width:32px;height:31px;border-radius:9px}.volume-mini input{width:58px}.subtitle-layer{bottom:72px}.subtitle{max-width:94%;font-weight:600}.item{padding:11px 8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
+
+
+.visual{--ui-hide-delay:2600ms}
+.video-ui{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none;transition:opacity .24s ease,transform .24s ease,visibility .24s ease}
+.visual:hover .video-ui,.visual:focus-within .video-ui,.visual.ui-controls .video-ui{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+/* Desktop: controls appear only while the pointer is over the visual. */
+@media(min-width:561px){.visual:not(:hover):not(:focus-within) .video-ui{opacity:0;visibility:hidden;pointer-events:none}}
+.video-ui:before{content:"";position:absolute;left:14px;right:14px;bottom:8px;height:1px;background:rgba(243,234,223,.06);pointer-events:none}
+.video-progress{height:3px;margin:0 0 10px;box-shadow:0 0 0 1px rgba(255,255,255,.025)}
+.video-progress:hover,.video-progress:active{height:5px}
+.video-progress::-webkit-slider-thumb{width:10px;height:10px;box-shadow:0 0 0 3px rgba(208,51,71,.18),0 2px 10px rgba(0,0,0,.45);transition:transform .16s ease}
+.video-progress:hover::-webkit-slider-thumb{transform:scale(1.15)}
+.video-progress::-moz-range-thumb{width:10px;height:10px;box-shadow:0 0 0 3px rgba(208,51,71,.18),0 2px 10px rgba(0,0,0,.45)}
+.video-buttons{gap:7px}
+.vbtn{width:31px;height:30px;border-radius:9px;font-size:10px;background:rgba(7,7,7,.62);box-shadow:0 5px 16px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.045)}
+.vbtn:hover{transform:translateY(-1px) scale(1.025)}
+.vbtn svg{width:13px;height:13px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.vbtn.play-mini svg{fill:currentColor;stroke:none}
+.volume-mini{height:30px;gap:7px;padding:0 3px}
+.volume-mini input{width:58px;height:12px;appearance:none;-webkit-appearance:none;background:transparent;cursor:pointer}
+.volume-mini input::-webkit-slider-runnable-track{height:2px;border-radius:99px;background:linear-gradient(90deg,var(--cream) 0,var(--cream) var(--vol-value,90%),rgba(255,255,255,.18) var(--vol-value,90%),rgba(255,255,255,.18) 100%)}
+.volume-mini input::-moz-range-track{height:2px;border-radius:99px;background:rgba(255,255,255,.18)}
+.volume-mini input::-moz-range-progress{height:2px;border-radius:99px;background:var(--cream)}
+.volume-mini input::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:8px;margin-top:-3px;border-radius:50%;background:var(--cream);box-shadow:0 0 0 2px rgba(208,51,71,.15)}
+.volume-mini input::-moz-range-thumb{width:8px;height:8px;border:0;border-radius:50%;background:var(--cream);box-shadow:0 0 0 2px rgba(208,51,71,.15)}
+.vtime{font-size:9px;opacity:.72;margin-left:2px}
+.controls{padding-top:18px}
+.actions{gap:12px}
+.btn{width:43px;height:43px;box-shadow:0 9px 25px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.045)}
+.play-btn{width:60px;height:60px}
+.btn svg{width:15px;height:15px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.play-btn svg{width:19px;height:19px;fill:currentColor;stroke:none}
+.mode-btn{font-size:0}
+.now{padding-top:20px}
+.track-number{font-variant-numeric:tabular-nums}
+.search:focus-within{border-color:rgba(208,51,71,.34);box-shadow:0 0 0 3px rgba(165,30,49,.08)}
+.item{transition:background .22s ease,transform .22s ease,border .22s ease,box-shadow .22s ease}
+.item:hover{transform:translateX(2px)}
+.item.active{transform:none}
+.connection-pill{transition:opacity .2s ease}
+
+@media(max-width:560px){
+  .visual{touch-action:manipulation;--ui-hide-delay:3200ms}
+  .video-ui{padding:48px 10px 10px}
+  .video-buttons{gap:5px}
+  .vbtn{width:31px;height:30px}
+  .volume-mini input{width:52px}
+  .vtime{font-size:8px}
+  .visual.ui-controls .video-ui{opacity:1;visibility:visible;pointer-events:auto}
+  .visual:not(.ui-controls) .video-ui{opacity:0;visibility:hidden;pointer-events:none}
+  .subtitle-layer{bottom:70px}
+  .subtitle{font-size:14px}
+  .controls{padding:14px 9px 15px}
+  .actions{gap:7px}
+  .btn{width:39px;height:39px}
+  .play-btn{width:54px;height:54px}
+}
+
+@media(max-width:380px){
+  .vtime{display:none}
+  .volume-mini input{width:45px}
+  .actions{gap:5px}
+  .btn{width:37px;height:37px}
+  .play-btn{width:51px;height:51px}
+}
+
+@media(hover:none){
+  .visual:hover .video-ui{opacity:inherit;visibility:inherit}
+}
+
 </style>
 </head>
 <body>
@@ -64,13 +134,26 @@ button,input{touch-action:manipulation}
 <div class="subtitle-layer" aria-live="polite"><div id="subtitle" class="subtitle"></div></div>
 <div class="video-ui">
 <input id="videoProgress" class="video-progress" type="range" min="0" max="100" value="0" aria-label="Tiến trình video">
-<div class="video-buttons"><button class="vbtn" id="videoPlay" title="Phát / Tạm dừng">▶</button><button class="vbtn" id="videoMute" title="Tắt âm">🔊</button><div class="volume-mini"><input id="videoVolume" type="range" min="0" max="1" step=".01" value=".9" aria-label="Âm lượng"></div><span class="vtime" id="videoTime">0:00 / 0:00</span><div class="vspacer"></div><button class="vbtn" id="ccButton" title="Phụ đề">CC</button><button class="vbtn" id="fullscreenButton" title="Toàn màn hình">⛶</button></div>
+<div class="video-buttons">
+<button class="vbtn play-mini" id="videoPlay" title="Phát / Tạm dừng" aria-label="Phát / Tạm dừng"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg></button>
+<button class="vbtn" id="videoMute" title="Tắt âm" aria-label="Tắt âm"><svg id="muteIcon" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M17 9.5a4 4 0 0 1 0 5"/></svg></button>
+<div class="volume-mini"><input id="videoVolume" type="range" min="0" max="1" step=".01" value=".9" aria-label="Âm lượng"></div>
+<span class="vtime" id="videoTime">0:00 / 0:00</span><div class="vspacer"></div>
+<button class="vbtn" id="ccButton" title="Phụ đề" aria-label="Phụ đề">CC</button>
+<button class="vbtn" id="fullscreenButton" title="Toàn màn hình" aria-label="Toàn màn hình"><svg viewBox="0 0 24 24"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg></button>
+</div>
 </div>
 <div class="cc-menu" id="ccMenu"><div class="cc-title">SUBTITLES</div><button class="cc-option selected" data-sub="on"><span class="cc-dot"></span>Bật phụ đề</button><button class="cc-option" data-sub="off"><span class="cc-dot"></span>Tắt phụ đề</button></div>
 <span class="corner">VISUAL ALBUM · 2026</span>
 </div>
 <div class="now"><div class="now-title"><h2 id="title">Đang tải album…</h2><p id="meta">HVL Album · —</p></div><div class="track-number" id="trackNumber">01</div></div>
-<div class="controls"><div class="actions"><button class="btn mode-btn" id="shuffle" title="Shuffle" aria-label="Shuffle"><span>⌘</span></button><button class="btn" id="prev" title="Previous" aria-label="Previous"><span>⏮</span></button><button class="btn play-btn" id="play" title="Play" aria-label="Play"><span>▶</span></button><button class="btn" id="next" title="Next" aria-label="Next"><span>⏭</span></button><button class="btn mode-btn" id="repeat" title="Repeat" aria-label="Repeat"><span>↻</span></button></div><div class="control-hint"><span id="current">0:00</span><span class="hint-dot"></span><span id="duration">0:00</span><span class="hint-label">HVL VISUAL PLAYER</span></div></div>
+<div class="controls"><div class="actions">
+<button class="btn mode-btn" id="shuffle" title="Shuffle" aria-label="Shuffle"><svg viewBox="0 0 24 24"><path d="M3 7h3c4 0 6 10 10 10h5"/><path d="M18 14l3 3-3 3"/><path d="M3 17h3c1.8 0 3-1.3 4-3"/><path d="M15 7h1c2 0 3 3 5 3h0"/><path d="M18 4l3 3-3 3"/></svg></button>
+<button class="btn" id="prev" title="Previous" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5v14M18 7l-8 5 8 5z"/></svg></button>
+<button class="btn play-btn" id="play" title="Play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M9 6v12l9-6z"/></svg></button>
+<button class="btn" id="next" title="Next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M18 5v14M6 7l8 5-8 5z"/></svg></button>
+<button class="btn mode-btn" id="repeat" title="Repeat" aria-label="Repeat"><svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4"/><path d="M3 12a6 6 0 0 1 6-6h12M7 21l-4-4 4-4"/><path d="M21 12a6 6 0 0 1-6 6H3"/></svg></button>
+</div><div class="control-hint"><span id="current">0:00</span><span class="hint-dot"></span><span id="duration">0:00</span><span class="hint-label">HVL VISUAL PLAYER</span></div></div>
 </section>
 <aside class="card side"><div class="side-top"><h2 class="side-title">Playlist</h2><span class="count" id="count">0 TRACKS</span></div><div class="search"><span class="search-icon">⌕</span><input id="search" placeholder="Tìm trong album…"></div><div class="playlist" id="playlist"></div><div class="source-status" id="status">Đang kết nối với Google Drive…</div><div class="connection-pill online" id="connectionPill"><span class="dot"></span><span id="connectionText">ONLINE · STREAM READY</span></div></aside>
 </main>
@@ -192,13 +275,12 @@ function togglePlay(){
 function toggleShuffle(){shuffle=!shuffle;document.getElementById("shuffle").classList.toggle("active",shuffle);preload()}
 function toggleRepeat(){repeat=!repeat;document.getElementById("repeat").classList.toggle("active",repeat)}
 function update(){if(!active.duration)return;const p=active.currentTime/active.duration*100;videoProgress.value=p;videoProgress.style.setProperty("--video-value",p+"%");document.getElementById("current").textContent=fmt(active.currentTime);document.getElementById("duration").textContent=fmt(active.duration);videoTime.textContent=fmt(active.currentTime)+" / "+fmt(active.duration)}
-function syncVolume(v){const val=Number(v);active.volume=val;active.muted=val===0;buffer.volume=0;buffer.muted=true;videoVolume.value=val;volume.value=val;videoMute.textContent=val===0?"🔇":"🔊"}
-videoProgress.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(videoProgress.value)/100*active.duration});volume.addEventListener("input",()=>syncVolume(volume.value));videoVolume.addEventListener("input",()=>syncVolume(videoVolume.value));videoMute.addEventListener("click",()=>{if(active.volume>0){active.dataset.previousVolume=active.volume;syncVolume(0)}else syncVolume(Number(active.dataset.previousVolume||.9))});A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);function syncPlayButtons(){const playing=!active.paused;document.getElementById("play").textContent=playing?"⏸":"▶";videoPlay.textContent=playing?"⏸":"▶"}
+function syncVolume(v){const val=Math.max(0,Math.min(1,Number(v)));active.volume=val;active.muted=val===0;buffer.volume=0;buffer.muted=true;videoVolume.value=val;volume.value=val;videoVolume.style.setProperty("--vol-value",(val*100)+"%");videoMute.classList.toggle("active",val===0);videoMute.setAttribute("aria-label",val===0?"Bật âm":"Tắt âm");videoMute.title=val===0?"Bật âm":"Tắt âm"}
+videoProgress.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(videoProgress.value)/100*active.duration});volume.addEventListener("input",()=>syncVolume(volume.value));videoVolume.addEventListener("input",()=>syncVolume(videoVolume.value));videoMute.addEventListener("click",()=>{if(active.volume>0){active.dataset.previousVolume=active.volume;syncVolume(0)}else syncVolume(Number(active.dataset.previousVolume||.9))});A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);function syncPlayButtons(){const playing=!active.paused;const main=document.getElementById("play");const mini=document.getElementById("videoPlay");const icon=playing?'<svg viewBox="0 0 24 24"><path d="M7 6v12M17 6v12"/></svg>':'<svg viewBox="0 0 24 24"><path d="M9 6v12l9-6z"/></svg>';main.innerHTML=icon;mini.innerHTML=icon;main.title=playing?"Tạm dừng":"Phát";mini.title=main.title}
 A.addEventListener("play",()=>{if(active===A){syncPlayButtons();preload();startSubtitleLoop()}});B.addEventListener("play",()=>{if(active===B){syncPlayButtons();preload();startSubtitleLoop()}});A.addEventListener("pause",()=>{if(active===A)syncPlayButtons()});B.addEventListener("pause",()=>{if(active===B)syncPlayButtons()});document.getElementById("play").onclick=togglePlay;videoPlay.onclick=togglePlay;document.getElementById("next").onclick=nextTrack;document.getElementById("prev").onclick=previousTrack;document.getElementById("shuffle").onclick=toggleShuffle;document.getElementById("repeat").onclick=toggleRepeat;document.getElementById("search").oninput=render;
 ccButton.addEventListener("click",e=>{e.stopPropagation();ccMenu.classList.toggle("open")});document.querySelectorAll(".cc-option").forEach(btn=>btn.addEventListener("click",()=>{toggleSubtitles(btn.dataset.sub==="on");ccMenu.classList.remove("open")}));document.addEventListener("click",e=>{if(!ccMenu.contains(e.target)&&e.target!==ccButton)ccMenu.classList.remove("open")});
 async function toggleFullscreen(){try{if(!document.fullscreenElement){if(visual.requestFullscreen)await visual.requestFullscreen();else if(visual.webkitRequestFullscreen)visual.webkitRequestFullscreen()}else{if(document.exitFullscreen)await document.exitFullscreen()}}catch(err){try{if(active.webkitEnterFullscreen)active.webkitEnterFullscreen()}catch(_){}}}
 fullscreenButton.addEventListener("click",toggleFullscreen);document.addEventListener("fullscreenchange",()=>{fullscreenButton.textContent=document.fullscreenElement?"✕":"⛶"});
-// --- Playback resilience: do not pause when the tab becomes hidden. ---
 function scheduleResume(reason){
   if(!userWantsPlayback || intentionalPause || !active || transitioning)return;
   clearTimeout(resumeTimer);
@@ -237,7 +319,31 @@ window.addEventListener("offline",handleOffline);
   v.addEventListener("stalled",()=>{if(active===v && userWantsPlayback)scheduleResume("stalled")});
 });
 
-// Media Session gives mobile/desktop browsers proper lock-screen and headset controls.
+
+let uiHideTimer=null;
+function showVideoUI(){
+  const v=document.getElementById("visual");
+  if(!v)return;
+  v.classList.add("ui-controls");
+  clearTimeout(uiHideTimer);
+  uiHideTimer=setTimeout(()=>{
+    if(document.activeElement && v.contains(document.activeElement))return;
+    if(!ccMenu.classList.contains("open"))v.classList.remove("ui-controls");
+  }, window.matchMedia("(max-width:560px)").matches ? 3600 : 3000);
+}
+function keepVideoUI(e){showVideoUI();if(e)e.stopPropagation()}
+visual.addEventListener("pointermove",()=>{if(window.matchMedia("(hover:hover)").matches)showVideoUI()},{passive:true});
+visual.addEventListener("pointerdown",e=>{
+  if(window.matchMedia("(max-width:560px)").matches){
+    if(e.target.closest("button,input,.cc-menu")){showVideoUI();return}
+    if(!visual.classList.contains("ui-controls")){showVideoUI();return}
+  }
+},{passive:true});
+visual.addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").matches && !ccMenu.classList.contains("open")){clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>visual.classList.remove("ui-controls"),450)}});
+[videoProgress,videoPlay,videoMute,videoVolume,ccButton,fullscreenButton].forEach(el=>el.addEventListener("pointerdown",keepVideoUI,{passive:true}));
+ccMenu.addEventListener("pointerdown",keepVideoUI,{passive:true});
+fullscreenButton.addEventListener("click",()=>setTimeout(showVideoUI,80));
+
 if("mediaSession" in navigator){
   const setMediaSession=()=>{
     const t=tracks[current];
