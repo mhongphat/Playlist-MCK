@@ -26,7 +26,7 @@
 @media(max-width:930px){.app{padding:15px}.shell{grid-template-columns:1fr}.playlist{max-height:390px}.header{margin-bottom:15px}}
 @media(max-width:560px){.app{padding:10px 10px 5px}.card{border-radius:18px}.monogram{width:42px;height:42px;border-radius:13px}.brand-title{font-size:20px}.eyebrow{font-size:7px}.header-right{display:none}.now{padding:15px 15px 5px}.now-title h2{font-size:21px}.track-number{font-size:22px}.controls{padding:13px 10px 15px}.actions{gap:8px}.btn{width:39px;height:39px}.play-btn{width:53px;height:53px}.control-hint{font-size:8px;margin-top:8px}.hint-label{display:none}.side{padding:14px}.playlist{max-height:370px}.footer{padding-top:18px;font-size:8px;letter-spacing:.08em}.footer:before,.footer:after{width:22px;margin:0 8px}.subtitle-layer{width:92%;bottom:68px}.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;font-size:14px;padding:7px 11px 8px;border-radius:8px;line-height:1.32}.video-ui{padding:45px 9px 9px}.video-progress{height:3px;margin-bottom:8px}.vbtn{width:30px;height:29px;font-size:11px}.volume-mini input{width:54px}.vtime{font-size:8px;margin:0 2px}.cc-menu{right:40px;bottom:43px;width:185px}}
 
-
+/* HVL V3 polish + background playback resilience */
 html{background:#060606;scroll-behavior:smooth}
 body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
 button,input{touch-action:manipulation}
@@ -54,10 +54,11 @@ button,input{touch-action:manipulation}
 
 
 
+/* ===================== HVL V4 — CINEMATIC CONTROL LAYER ===================== */
 .visual{--ui-hide-delay:2600ms}
 .video-ui{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none;transition:opacity .24s ease,transform .24s ease,visibility .24s ease}
 .visual:hover .video-ui,.visual:focus-within .video-ui,.visual.ui-controls .video-ui{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
-
+/* Desktop: controls appear only while the pointer is over the visual. */
 @media(min-width:561px){.visual:not(:hover):not(:focus-within) .video-ui{opacity:0;visibility:hidden;pointer-events:none}}
 .video-ui:before{content:"";position:absolute;left:14px;right:14px;bottom:8px;height:1px;background:rgba(243,234,223,.06);pointer-events:none}
 .video-progress{height:3px;margin:0 0 10px;box-shadow:0 0 0 1px rgba(255,255,255,.025)}
@@ -123,15 +124,27 @@ button,input{touch-action:manipulation}
 }
 
 
+
 .play-btn{color:var(--cream)!important}.play-btn svg{color:var(--cream)!important}
 .video-ui{contain:layout paint}.visual video{contain:strict}
 .loading-sheen{position:absolute;inset:0;z-index:11;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(208,51,71,.07),transparent 38%);opacity:0;transition:opacity .25s ease}.visual.buffering .loading-sheen{opacity:1}
 @media(max-width:560px){.visual video{object-fit:contain}.subtitle{font-size:clamp(13px,3.8vw,16px)}}
+
+
+.visual.mobile-single #videoB{display:none}
+.visual.mobile-single #videoA{opacity:1}
+.visual.buffering .loading-sheen{animation:hvlPulse 1.4s ease-in-out infinite}
+@keyframes hvlPulse{0%,100%{opacity:.35}50%{opacity:1}}
+@media(max-width:700px){
+  .video-ui{padding-bottom:10px}
+  .visual{--sub-bottom:74px}
+  .subtitle{font-size:clamp(13px,4vw,16px)}
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER ·</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
+<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
 <main class="shell">
 <section class="card">
 <div class="visual" id="visual">
@@ -173,8 +186,12 @@ const API_KEY = "AIzaSyBv2xnFQxz5P6PEosKNKaO3BrV6a_pSfDY";
 const FOLDER_ID = "1ckf_j0cc-87VPG186w2Ilm003pt0ifjR";
 const SUBTITLE_BASE = "./subtitles/";
 const SUBTITLE_EXT = ".vtt";
-/* ========================================================== */
+
 const A=document.getElementById("videoA"),B=document.getElementById("videoB");
+const MOBILE_BREAKPOINT=700;
+const isMobile=()=>window.matchMedia(`(max-width:${MOBILE_BREAKPOINT}px)`).matches;
+visual.classList.toggle("mobile-single",isMobile());
+window.addEventListener("resize",()=>visual.classList.toggle("mobile-single",isMobile()),{passive:true});
 const volume=document.getElementById("videoVolume");
 const statusEl=document.getElementById("status"),subtitleEl=document.getElementById("subtitle"),visual=document.getElementById("visual");
 const videoProgress=document.getElementById("videoProgress"),videoPlay=document.getElementById("videoPlay"),videoMute=document.getElementById("videoMute"),videoVolume=document.getElementById("videoVolume"),videoTime=document.getElementById("videoTime"),ccButton=document.getElementById("ccButton"),ccMenu=document.getElementById("ccMenu"),fullscreenButton=document.getElementById("fullscreenButton");
@@ -194,7 +211,7 @@ function startSubtitleLoop(){if(subtitleRAF)cancelAnimationFrame(subtitleRAF);co
 function renderSubtitle(cue){if(!subtitleEnabled||!cue){subtitleEl.classList.remove("show");return}const wanted=cue.text.replace(/\n/g,"<br>");if(subtitleEl.innerHTML!==wanted){subtitleEl.classList.remove("show");requestAnimationFrame(()=>{subtitleEl.innerHTML=wanted;subtitleEl.classList.add("show")})}else subtitleEl.classList.add("show")}
 function toggleSubtitles(enabled){subtitleEnabled=enabled;document.querySelectorAll(".cc-option").forEach(btn=>btn.classList.toggle("selected",btn.dataset.sub===(enabled?"on":"off")));ccButton.classList.toggle("active",enabled);ccButton.title=enabled?"Tắt phụ đề":"Bật phụ đề";if(!enabled)subtitleEl.classList.remove("show")}
 function render(){const q=document.getElementById("search").value.trim().toLowerCase(),box=document.getElementById("playlist");box.innerHTML="";tracks.forEach((t,i)=>{if(q&&!t.name.toLowerCase().includes(q))return;const el=document.createElement("div");el.className="item"+(i===current?" active":"");el.innerHTML='<div class="num">'+String(i+1).padStart(2,"0")+'</div><div class="song">'+esc(t.name)+'</div><div class="arrow">›</div>';el.onclick=()=>selectTrack(i,true);box.appendChild(el)});document.getElementById("count").textContent=tracks.length+" TRACKS";document.getElementById("meta").textContent="HVL Album · "+(tracks.length?current+1:0)+" / "+tracks.length;document.getElementById("trackNumber").textContent=String(tracks.length?current+1:1).padStart(2,"0");if(window._setMediaSession)window._setMediaSession()}
-function isMobilePlayback(){return window.matchMedia && window.matchMedia("(max-width: 700px)").matches}
+function isMobilePlayback(){return isMobile()}
 function trackKey(track){return track ? String(track.id) : ""}
 function bufferedAhead(video){
   if(!video || !Number.isFinite(video.currentTime)) return 0;
@@ -208,28 +225,31 @@ function bufferedAhead(video){
 }
 let bufferTrackId="";
 let preloadToken=0;
+let bufferReady=false;
 function clearVideo(video){
   try{video.pause()}catch(e){}
   video.removeAttribute("src");
   video.load();
+  video.dataset.trackId="";
 }
 function loadInto(video,track,force=false){
-  if(!track)return;
+  if(!track)return false;
   const isBuffer=video===buffer;
   const key=trackKey(track);
-  if(isBuffer && !force && bufferTrackId===key && video.src) return;
-  if(!isBuffer && video.dataset.trackId===key && video.src) return;
+  if(isBuffer && !force && bufferTrackId===key && video.src) return true;
+  if(!isBuffer && !force && video.dataset.trackId===key && video.src) return true;
   clearVideo(video);
   video.dataset.trackId=key;
   if(isBuffer) bufferTrackId=key;
   video.src=mediaURL(track.id);
-  video.preload=isBuffer?"auto":"metadata";
+  video.preload=isBuffer ? (isMobilePlayback()?"auto":"auto") : "metadata";
   video.playsInline=true;
   video.setAttribute("playsinline","");
   video.setAttribute("webkit-playsinline","");
   video.muted=isBuffer;
   video.volume=isBuffer?0:Number(volume.value);
   video.load();
+  return true;
 }
 function getNext(){
   if(!tracks.length)return 0;
@@ -238,11 +258,22 @@ function getNext(){
 }
 function preload(force=false){
   if(!tracks.length)return;
-  const next=tracks[getNext()], key=trackKey(next);
+  const next=tracks[getNext()],key=trackKey(next);
   if(!force && bufferTrackId===key && buffer.src) return;
   const token=++preloadToken;
+  bufferReady=false;
   loadInto(buffer,next,force);
-  buffer.addEventListener("canplay",()=>{if(token===preloadToken) console.debug("HVL preload ready:",next.name)},{once:true});
+  const onReady=()=>{
+    if(token!==preloadToken || bufferTrackId!==key)return;
+    bufferReady=true;
+    buffer.dataset.preloaded="1";
+    console.debug("HVL preload ready:",next.name);
+  };
+  buffer.addEventListener("canplay",onReady,{once:true});
+  buffer.addEventListener("loadeddata",()=>{if(token===preloadToken&&bufferTrackId===key)bufferReady=true},{once:true});
+}
+function bufferIsUsable(track){
+  return !!track && bufferTrackId===trackKey(track) && !!buffer.src && buffer.readyState>=2;
 }
 async function playActive(opts={}){
   const {fromGesture=false,autoTransition=false}=opts;
@@ -311,94 +342,94 @@ function selectTrack(index, shouldPlay=false){
     intentionalPause=false;
     // Calling play from a click is a user gesture and is therefore the safest
     // point to request playback on Safari/iOS.
-    playActive({fromGesture:true}).then(()=>preload());
+    playActive({fromGesture:true}).then(()=>{
+      if(isMobilePlayback())setTimeout(()=>preload(false),700); else preload(false);
+    });
   }else{
     userWantsPlayback=false;
     intentionalPause=false;
-    preload();
+    // Metadata-only initial state: avoid opening two large Drive streams before the user plays.
+    if(!isMobilePlayback())preload(false);
   }
 }
 
-function promoteBuffered(n,doFade){
+function switchToBuffered(n,fade=false){
   const incoming=buffer,outgoing=active,track=tracks[n];
-  if(!track)return false;
-  const ready=incoming.readyState>=3 && bufferedAhead(incoming)>=0.35;
-  if(!ready)return false;
+  if(!track || !bufferIsUsable(track)) return false;
   const token=++crossfadeToken;
   transitioning=true;
   incoming.currentTime=0;
-  incoming.muted=!!doFade;
-  incoming.volume=doFade?0:Number(volume.value);
-  incoming.play().then(()=>{
-    if(token!==crossfadeToken){try{incoming.pause()}catch(e){};return}
+  incoming.muted=!!fade;
+  incoming.volume=fade?0:Number(volume.value);
+  const p=incoming.play();
+  if(!p || typeof p.then!=="function") return false;
+  p.then(()=>{
+    if(token!==crossfadeToken)return;
     incoming.classList.add("active");
     outgoing.classList.remove("active");
-    active=incoming;buffer=outgoing;bufferTrackId="";current=n;
+    active=incoming;buffer=outgoing;bufferTrackId="";bufferReady=false;current=n;
     active.muted=false;active.volume=Number(volume.value);
     document.getElementById("title").textContent=track.name;
     render();loadSubtitles(track);userWantsPlayback=true;
     syncPlayButtons();
-    if(doFade){
-      const max=Number(volume.value),started=performance.now(),duration=620;
-      const fade=now=>{
+    if(fade){
+      const max=Number(volume.value),started=performance.now(),duration=520;
+      const fadeStep=now=>{
         if(token!==crossfadeToken)return;
-        const p=Math.min(1,(now-started)/duration);
-        active.volume=max*p;outgoing.volume=max*(1-p);
-        if(p<1)requestAnimationFrame(fade);else finishTransition(outgoing);
+        const q=Math.min(1,(now-started)/duration);
+        active.volume=max*q;outgoing.volume=max*(1-q);
+        if(q<1)requestAnimationFrame(fadeStep);else finishTransition(outgoing);
       };
-      requestAnimationFrame(fade);
+      requestAnimationFrame(fadeStep);
     }else finishTransition(outgoing);
+    playActive({autoTransition:true});
   }).catch(err=>{
-    console.debug("Buffered next play deferred:",err?.name||err);
+    console.debug("HVL buffered promotion deferred:",err?.name||err);
     transitioning=false;
     incoming.pause();incoming.muted=true;incoming.volume=0;
-    setStatus("Bài kế đã sẵn sàng · Bấm ▶ nếu trình duyệt yêu cầu.",false,"ok");
+    setStatus("Bài kế đã chuẩn bị · đang chờ phát…",false,"ok");
     syncPlayButtons();
   });
   return true;
 }
 function finishTransition(outgoing){
   try{outgoing.pause()}catch(e){}
-  outgoing.removeAttribute("src");outgoing.load();outgoing.muted=true;outgoing.volume=0;
-  outgoing.dataset.trackId="";
-  bufferTrackId="";
-  transitioning=false;
-  visual.classList.remove("buffering");
-  preload();syncPlayButtons();
+  outgoing.removeAttribute("src");outgoing.load();outgoing.muted=true;outgoing.volume=0;outgoing.dataset.trackId="";
+  bufferTrackId="";bufferReady=false;transitioning=false;visual.classList.remove("buffering");
+  setTimeout(()=>preload(false),120);
+  syncPlayButtons();
 }
 function directNext(){
   if(!tracks.length)return;
-  const n=getNext(),incoming=buffer,outgoing=active,track=tracks[n];
-  // If the next file is already buffered, promote it immediately. This avoids re-downloading it.
-  if(incoming.readyState>=2 && incoming.src && bufferTrackId===trackKey(track)){
-    outgoing.classList.remove("active");incoming.classList.add("active");
-    active=incoming;buffer=outgoing;bufferTrackId="";current=n;
-    active.currentTime=0;active.muted=false;active.volume=Number(volume.value);
-    document.getElementById("title").textContent=track.name;render();loadSubtitles(track);
-    userWantsPlayback=true;syncPlayButtons();
-    playActive({autoTransition:true});
-    return;
+  const n=getNext(),track=tracks[n];
+  if(!track)return;
+  // Prefer a preloaded next stream on both desktop and mobile. It is never played while hidden.
+  if(bufferIsUsable(track)){
+    if(switchToBuffered(n,isMobilePlayback()?false:true))return;
   }
-  // Fallback: reuse the current element rather than waiting forever for the hidden buffer.
-  clearVideo(outgoing);outgoing.dataset.trackId=trackKey(track);outgoing.src=mediaURL(track.id);outgoing.preload="metadata";
-  current=n;document.getElementById("title").textContent=track.name;render();loadSubtitles(track);
-  active.muted=false;active.volume=Number(volume.value);userWantsPlayback=true;
-  playActive({autoTransition:true});
-  preload();
+  // Last-resort fallback: load the next track on the currently visible element.
+  // This is intentionally immediate; never wait forever for a hidden buffer.
+  crossfadeToken++;transitioning=false;preloadToken++;bufferReady=false;
+  clearVideo(buffer);bufferTrackId="";
+  const outgoing=active;
+  loadInto(outgoing,track,true);
+  current=n;
+  document.getElementById("title").textContent=track.name;render();loadSubtitles(track);
+  outgoing.muted=false;outgoing.volume=Number(volume.value);userWantsPlayback=true;
+  setStatus("Đang mở bài kế…",false);
+  playActive({autoTransition:true}).then(()=>preload(false));
 }
 function crossfade(){
   if(transitioning||!tracks.length)return;
-  const n=getNext();
-  // Two-video crossfade is intentionally desktop-only. On mobile/iOS, one active
-  // media element is much more reliable and prevents the next stream from stalling.
-  if(isMobilePlayback()){directNext();return;}
-  const next=tracks[n];
-  const ready=bufferTrackId===trackKey(next) && buffer.readyState>=3 && bufferedAhead(buffer)>=0.35;
-  if(ready){promoteBuffered(n,true);return;}
-  // Never wait at the end of a song for an indefinitely buffering hidden video.
+  if(repeat){active.currentTime=0;playActive({autoTransition:true});return}
+  const n=getNext(),next=tracks[n];
+  const ready=bufferIsUsable(next);
+  if(ready){switchToBuffered(n,isMobilePlayback()?false:true);return}
+  // On mobile, don't attempt a two-element crossfade if the next stream isn't ready.
+  // Start it immediately instead of letting the current track end into an infinite wait.
   directNext();
 }
-function nextTrack(){if(!tracks.length)return;if(repeat){active.currentTime=0;playActive({autoTransition:true});return}crossfade()}
+function nextTrack(){if(!tracks.length)return;crossfade()}
 function previousTrack(){if(!tracks.length)return;if(active.currentTime>5){active.currentTime=0;return}selectTrack(current-1,true)}
 function togglePlay(){
   if(active.paused){userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true,autoTransition:false})}
@@ -410,9 +441,9 @@ function update(){
   if(!active.duration)return;
   const p=active.currentTime/active.duration*100;
   videoProgress.value=p;videoProgress.style.setProperty("--video-value",p+"%");
-  document.getElementById("current").textContent=fmt(active.currentTime);document.getElementById("duration").textContent=fmt(active.duration);videoTime.textContent=fmt(active.currentTime)+" / "+fmt(active.duration);
+  document.getElementById("current").textContent=fmt(active.currentTime);document.getElementById("duration").textContent=fmt(active.duration);videoTime.textContent=fmt(active.currentTime)+" / "+fmt(active.duration);if(navigator.mediaSession && "setPositionState" in navigator.mediaSession && active.duration>0){try{navigator.mediaSession.setPositionState({duration:active.duration,playbackRate:active.playbackRate||1,position:Math.min(active.currentTime,active.duration-0.001)})}catch(e){}}
   // Start/refresh preloading early enough to hide Drive's range-request latency.
-  if(active.duration-active.currentTime<=18)preload();
+  if(userWantsPlayback && active.duration-active.currentTime<=30)preload();
 }
 function syncVolume(v){const val=Math.max(0,Math.min(1,Number(v)));active.volume=val;active.muted=val===0;buffer.volume=0;buffer.muted=true;videoVolume.value=val;volume.value=val;videoVolume.style.setProperty("--vol-value",(val*100)+"%");videoMute.classList.toggle("active",val===0);videoMute.setAttribute("aria-label",val===0?"Bật âm":"Tắt âm");videoMute.title=val===0?"Bật âm":"Tắt âm"}
 videoProgress.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(videoProgress.value)/100*active.duration});
@@ -425,14 +456,14 @@ function syncPlayButtons(){
   main.innerHTML=icon;mini.innerHTML=icon;main.title=playing?"Tạm dừng":"Phát";mini.title=main.title;
 }
 A.addEventListener("play",()=>{if(active===A){syncPlayButtons();preload();startSubtitleLoop()}});B.addEventListener("play",()=>{if(active===B){syncPlayButtons();preload();startSubtitleLoop()}});
-A.addEventListener("pause",()=>{if(active===A)syncPlayButtons()});B.addEventListener("pause",()=>{if(active===B)syncPlayButtons()});
+A.addEventListener("pause",()=>{if(active===A){syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState="paused"}});B.addEventListener("pause",()=>{if(active===B){syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState="paused"}});
 document.getElementById("play").onclick=togglePlay;videoPlay.onclick=togglePlay;document.getElementById("next").onclick=nextTrack;document.getElementById("prev").onclick=previousTrack;document.getElementById("shuffle").onclick=toggleShuffle;document.getElementById("repeat").onclick=toggleRepeat;document.getElementById("search").oninput=render;
 ccButton.addEventListener("click",e=>{e.stopPropagation();ccMenu.classList.toggle("open")});document.querySelectorAll(".cc-option").forEach(btn=>btn.addEventListener("click",()=>{toggleSubtitles(btn.dataset.sub==="on");ccMenu.classList.remove("open")}));document.addEventListener("click",e=>{if(!ccMenu.contains(e.target)&&e.target!==ccButton)ccMenu.classList.remove("open")});
 async function toggleFullscreen(){try{if(!document.fullscreenElement){if(visual.requestFullscreen)await visual.requestFullscreen();else if(visual.webkitRequestFullscreen)visual.webkitRequestFullscreen()}else{if(document.exitFullscreen)await document.exitFullscreen()}}catch(err){try{if(active.webkitEnterFullscreen)active.webkitEnterFullscreen()}catch(_){}}}
 fullscreenButton.addEventListener("click",toggleFullscreen);document.addEventListener("fullscreenchange",()=>{fullscreenButton.textContent=document.fullscreenElement?"✕":"⛶"});
 // --- Playback resilience ---
 function scheduleResume(reason){if(!userWantsPlayback||intentionalPause||!active||transitioning)return;clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{if(!userWantsPlayback||intentionalPause||!active||!active.paused)return;playActive({autoTransition:true})},reason==="visible"?120:500)}
-function handleVisibility(){if(document.visibilityState==="visible"){if(userWantsPlayback&&active.paused)scheduleResume("visible");syncPlayButtons()}}
+function handleVisibility(){if(document.visibilityState==="visible"){if(userWantsPlayback&&active.paused)scheduleResume("visible");syncPlayButtons()}else{clearTimeout(resumeTimer)}}
 function handlePageShow(){if(userWantsPlayback&&active.paused)scheduleResume("pageshow")}
 function handleOnline(){const pill=document.getElementById("connectionPill"),text=document.getElementById("connectionText");pill.classList.add("online");pill.classList.remove("offline");text.textContent="ONLINE · STREAM READY"}
 function handleOffline(){const pill=document.getElementById("connectionPill"),text=document.getElementById("connectionText");pill.classList.remove("online");pill.classList.add("offline");text.textContent="OFFLINE · ĐANG CHỜ KẾT NỐI"}
@@ -441,7 +472,7 @@ let waitingTimer=null;
 [A,B].forEach(v=>{
   v.addEventListener("pause",()=>{if(active===v){syncPlayButtons();if(document.visibilityState==="visible"&&userWantsPlayback&&!intentionalPause&&!transitioning)scheduleResume("visible")}});
   v.addEventListener("waiting",()=>{if(active!==v)return;clearTimeout(waitingTimer);waitingTimer=setTimeout(()=>{if(active===v&&!v.paused){visual.classList.add("buffering");setStatus("Đang đệm stream…",false)}},650)});
-  v.addEventListener("playing",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("✓ Đang phát · HVL Stream",false,"ok");syncPlayButtons()}});
+  v.addEventListener("playing",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("✓ Đang phát · HVL Stream",false,"ok");syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState="playing"}});
   v.addEventListener("canplay",()=>{if(active===v){visual.classList.remove("buffering");clearTimeout(waitingTimer)}});
   v.addEventListener("stalled",()=>{if(active===v&&userWantsPlayback)scheduleResume("stalled")});
   v.addEventListener("error",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("Stream gặp lỗi · đang thử kết nối lại…",true);if(userWantsPlayback)scheduleResume("error")}});
@@ -456,11 +487,33 @@ visual.addEventListener("pointerdown",e=>{if(window.matchMedia("(max-width:560px
 visual.addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").matches&&!ccMenu.classList.contains("open")){clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>visual.classList.remove("ui-controls"),450)}});
 [videoProgress,videoPlay,videoMute,videoVolume,ccButton,fullscreenButton].forEach(el=>el.addEventListener("pointerdown",keepVideoUI,{passive:true}));ccMenu.addEventListener("pointerdown",keepVideoUI,{passive:true});fullscreenButton.addEventListener("click",()=>setTimeout(showVideoUI,80));
 
+// Mobile/iOS user activation: remember that the page has been interacted with. Do not force autoplay.
+let pageActivated=false;
+document.addEventListener("pointerup",()=>{pageActivated=true},{once:true,passive:true});
+
 // Media Session
-if("mediaSession" in navigator){const setMediaSession=()=>{const t=tracks[current];if(!t)return;try{navigator.mediaSession.metadata=new MediaMetadata({title:t.name.replace(/\.mp4$/i,""),artist:"HVL",album:"HVL Album"});navigator.mediaSession.setActionHandler("play",()=>{userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true})});navigator.mediaSession.setActionHandler("pause",()=>{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false});navigator.mediaSession.setActionHandler("nexttrack",nextTrack);navigator.mediaSession.setActionHandler("previoustrack",previousTrack);navigator.mediaSession.setActionHandler("seekbackward",()=>{active.currentTime=Math.max(0,active.currentTime-10)});navigator.mediaSession.setActionHandler("seekforward",()=>{active.currentTime=Math.min(active.duration||0,active.currentTime+10)})}catch(e){}};window._setMediaSession=setMediaSession}
+if("mediaSession" in navigator){
+  const setMediaSession=()=>{
+    const t=tracks[current];if(!t)return;
+    try{
+      navigator.mediaSession.metadata=new MediaMetadata({title:t.name.replace(/\.mp4$/i,""),artist:"HVL",album:"HVL Album"});
+      navigator.mediaSession.playbackState=active&&!active.paused?"playing":"paused";
+      if("setPositionState" in navigator.mediaSession && active && Number.isFinite(active.duration) && active.duration>0){
+        try{navigator.mediaSession.setPositionState({duration:active.duration,playbackRate:active.playbackRate||1,position:Math.min(active.currentTime,Math.max(0,active.duration-0.001))})}catch(e){}
+      }
+      const safe=(name,fn)=>{try{navigator.mediaSession.setActionHandler(name,fn)}catch(e){}};
+      safe("play",()=>{userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true})});
+      safe("pause",()=>{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false});
+      safe("nexttrack",nextTrack);safe("previoustrack",previousTrack);
+      safe("seekbackward",()=>{active.currentTime=Math.max(0,active.currentTime-10)});
+      safe("seekforward",()=>{active.currentTime=Math.min(active.duration||0,active.currentTime+10)});
+    }catch(e){}
+  };
+  window._setMediaSession=setMediaSession;
+}
 
 async function loadPlaylist(){if(location.protocol==="file:"){setStatus("⚠ Hãy mở bằng GitHub Pages (https://...) hoặc localhost, không mở file:// trực tiếp.",true);return}if(!API_KEY||API_KEY==="DAN_API_KEY_CUA_BAN_VAO_DAY"){setStatus("⚠ Chưa nhập API_KEY trong phần CONFIG của file HTML.",true);return}setStatus("Đang tải playlist từ Google Drive…");tracks=[];render();try{let token="";do{const params=new URLSearchParams({q:"'"+FOLDER_ID+"' in parents and trashed=false and mimeType contains 'video/'",key:API_KEY,pageSize:"1000",fields:"nextPageToken,files(id,name,mimeType,resourceKey)"});if(token)params.set("pageToken",token);const r=await fetch("https://www.googleapis.com/drive/v3/files?"+params.toString());const d=await r.json();if(!r.ok)throw new Error((d.error&&d.error.message)||("HTTP "+r.status));tracks.push(...(d.files||[]));token=d.nextPageToken||""}while(token);tracks.sort((a,b)=>a.name.localeCompare(b.name,"vi",{numeric:true,sensitivity:"base"}));render();if(!tracks.length){setStatus("Không tìm thấy video trong folder. Kiểm tra quyền chia sẻ và MIME type.",true);return}setStatus("✓ "+tracks.length+" video · Subtitle-ready · Sẵn sàng phát",false,"ok");selectTrack(0,false)}catch(err){console.error(err);setStatus("❌ "+err.message,true)}}
-window.addEventListener("DOMContentLoaded",()=>{toggleSubtitles(true);syncVolume(.9);loadPlaylist()});
+window.addEventListener("DOMContentLoaded",()=>{visual.classList.toggle("mobile-single",isMobilePlayback());toggleSubtitles(true);syncVolume(.9);loadPlaylist()});
 </script>
 </body>
 </html>
