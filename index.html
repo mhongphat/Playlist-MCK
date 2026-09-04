@@ -56,6 +56,7 @@ button,input{touch-action:manipulation}
 .visual{--ui-hide-delay:2600ms}
 .video-ui{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none;transition:opacity .24s ease,transform .24s ease,visibility .24s ease}
 .visual:hover .video-ui,.visual:focus-within .video-ui,.visual.ui-controls .video-ui{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+
 @media(min-width:561px){.visual:not(:hover):not(:focus-within) .video-ui{opacity:0;visibility:hidden;pointer-events:none}}
 .video-ui:before{content:"";position:absolute;left:14px;right:14px;bottom:8px;height:1px;background:rgba(243,234,223,.06);pointer-events:none}
 .video-progress{height:3px;margin:0 0 10px;box-shadow:0 0 0 1px rgba(255,255,255,.025)}
@@ -81,7 +82,7 @@ button,input{touch-action:manipulation}
 .btn{width:43px;height:43px;box-shadow:0 9px 25px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.045)}
 .play-btn{width:60px;height:60px}
 .btn svg{width:15px;height:15px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.play-btn svg{width:19px;height:19px;fill:currentColor;stroke:none}
+.play-btn svg{width:19px;height:19px;display:block;color:var(--cream);fill:currentColor;stroke:none}.play-btn svg.pause-icon{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
 .mode-btn{font-size:0}
 .now{padding-top:20px}
 .track-number{font-variant-numeric:tabular-nums}
@@ -120,14 +121,19 @@ button,input{touch-action:manipulation}
   .visual:hover .video-ui{opacity:inherit;visibility:inherit}
 }
 
+.play-btn{color:var(--cream)!important}.play-btn svg{color:var(--cream)!important}
+.video-ui{contain:layout paint}.visual video{contain:strict}
+.loading-sheen{position:absolute;inset:0;z-index:11;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(208,51,71,.07),transparent 38%);opacity:0;transition:opacity .25s ease}.visual.buffering .loading-sheen{opacity:1}
+@media(max-width:560px){.visual video{object-fit:contain}.subtitle{font-size:clamp(13px,3.8vw,16px)}}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
+<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">BLACK · CRIMSON · CREAM · SUBTITLES</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
 <main class="shell">
 <section class="card">
 <div class="visual" id="visual">
+<div class="loading-sheen" aria-hidden="true"></div>
 <span class="visual-badge">HVL / NOW PLAYING</span>
 <video id="videoA" class="active" playsinline preload="metadata"></video>
 <video id="videoB" playsinline preload="metadata"></video>
@@ -165,6 +171,7 @@ const API_KEY = "AIzaSyBv2xnFQxz5P6PEosKNKaO3BrV6a_pSfDY";
 const FOLDER_ID = "1ckf_j0cc-87VPG186w2Ilm003pt0ifjR";
 const SUBTITLE_BASE = "./subtitles/";
 const SUBTITLE_EXT = ".vtt";
+/* ========================================================== */
 const A=document.getElementById("videoA"),B=document.getElementById("videoB");
 const volume=document.getElementById("videoVolume");
 const statusEl=document.getElementById("status"),subtitleEl=document.getElementById("subtitle"),visual=document.getElementById("visual");
@@ -185,208 +192,194 @@ function startSubtitleLoop(){if(subtitleRAF)cancelAnimationFrame(subtitleRAF);co
 function renderSubtitle(cue){if(!subtitleEnabled||!cue){subtitleEl.classList.remove("show");return}const wanted=cue.text.replace(/\n/g,"<br>");if(subtitleEl.innerHTML!==wanted){subtitleEl.classList.remove("show");requestAnimationFrame(()=>{subtitleEl.innerHTML=wanted;subtitleEl.classList.add("show")})}else subtitleEl.classList.add("show")}
 function toggleSubtitles(enabled){subtitleEnabled=enabled;document.querySelectorAll(".cc-option").forEach(btn=>btn.classList.toggle("selected",btn.dataset.sub===(enabled?"on":"off")));ccButton.classList.toggle("active",enabled);ccButton.title=enabled?"Tắt phụ đề":"Bật phụ đề";if(!enabled)subtitleEl.classList.remove("show")}
 function render(){const q=document.getElementById("search").value.trim().toLowerCase(),box=document.getElementById("playlist");box.innerHTML="";tracks.forEach((t,i)=>{if(q&&!t.name.toLowerCase().includes(q))return;const el=document.createElement("div");el.className="item"+(i===current?" active":"");el.innerHTML='<div class="num">'+String(i+1).padStart(2,"0")+'</div><div class="song">'+esc(t.name)+'</div><div class="arrow">›</div>';el.onclick=()=>selectTrack(i,true);box.appendChild(el)});document.getElementById("count").textContent=tracks.length+" TRACKS";document.getElementById("meta").textContent="HVL Album · "+(tracks.length?current+1:0)+" / "+tracks.length;document.getElementById("trackNumber").textContent=String(tracks.length?current+1:1).padStart(2,"0");if(window._setMediaSession)window._setMediaSession()}
-function loadInto(video,track){
-  if(!track)return;
-  video.pause();
+function isMobilePlayback(){return window.matchMedia && window.matchMedia("(max-width: 700px)").matches}
+function trackKey(track){return track ? String(track.id) : ""}
+function bufferedAhead(video){
+  if(!video || !Number.isFinite(video.currentTime)) return 0;
+  try{
+    for(let i=0;i<video.buffered.length;i++){
+      const s=video.buffered.start(i),e=video.buffered.end(i);
+      if(video.currentTime>=s && video.currentTime<=e) return Math.max(0,e-video.currentTime);
+    }
+  }catch(e){}
+  return 0;
+}
+let bufferTrackId="";
+let preloadToken=0;
+function clearVideo(video){
+  try{video.pause()}catch(e){}
   video.removeAttribute("src");
   video.load();
+}
+function loadInto(video,track,force=false){
+  if(!track)return;
+  const isBuffer=video===buffer;
+  const key=trackKey(track);
+  if(isBuffer && !force && bufferTrackId===key && video.src) return;
+  if(!isBuffer && video.dataset.trackId===key && video.src) return;
+  clearVideo(video);
+  video.dataset.trackId=key;
+  if(isBuffer) bufferTrackId=key;
   video.src=mediaURL(track.id);
-  video.preload=(video===buffer)?"auto":"metadata";
+  video.preload=isBuffer?"auto":"metadata";
   video.playsInline=true;
   video.setAttribute("playsinline","");
   video.setAttribute("webkit-playsinline","");
-  video.volume=(video===buffer)?0:Number(volume.value);
-  video.muted=(video===buffer);
+  video.muted=isBuffer;
+  video.volume=isBuffer?0:Number(volume.value);
   video.load();
 }
-function getNext(){if(!tracks.length)return 0;if(shuffle&&tracks.length>1){let n=current;while(n===current)n=Math.floor(Math.random()*tracks.length);return n}return(current+1)%tracks.length}
-function preload(){if(tracks.length)loadInto(buffer,tracks[getNext()])}
-
-async function playActive({fromGesture=false,autoTransition=false}={}){
-  if(!active)return false;
-  try{
-    active.muted=false;
-    active.volume=Number(volume.value);
-    await active.play();
-    userWantsPlayback=true;
-    return true;
-  }catch(err){
-    console.warn("Playback request rejected:",err);
-    if(!autoTransition || fromGesture){
-      setStatus("Bấm ▶ để tiếp tục phát.",false);
-    }
-    return false;
-  }
+function getNext(){
+  if(!tracks.length)return 0;
+  if(shuffle&&tracks.length>1){let n=current;while(n===current)n=Math.floor(Math.random()*tracks.length);return n}
+  return(current+1)%tracks.length;
 }
-function selectTrack(i,autoplay=false){
+function preload(force=false){
   if(!tracks.length)return;
-  current=(i+tracks.length)%tracks.length;
-  document.getElementById("title").textContent=tracks[current].name;
-  render();
-  loadSubtitles(tracks[current]);
-  loadInto(active,tracks[current]);
-  active.muted=false;
-  active.volume=Number(volume.value);
-  preload();
-  if(autoplay){
-    userWantsPlayback=true; intentionalPause=false;
-    playActive({fromGesture:true,autoTransition:false});
-  }
+  const next=tracks[getNext()], key=trackKey(next);
+  if(!force && bufferTrackId===key && buffer.src) return;
+  const token=++preloadToken;
+  loadInto(buffer,next,force);
+  buffer.addEventListener("canplay",()=>{if(token===preloadToken) console.debug("HVL preload ready:",next.name)},{once:true});
 }
-function crossfade(){
-  if(transitioning||!tracks.length)return;
-  transitioning=true;
+function promoteBuffered(n,doFade){
+  const incoming=buffer,outgoing=active,track=tracks[n];
+  if(!track)return false;
+  const ready=incoming.readyState>=3 && bufferedAhead(incoming)>=0.35;
+  if(!ready)return false;
   const token=++crossfadeToken;
-  const n=getNext(),incoming=buffer,outgoing=active;
-  const start=()=>{
-    if(token!==crossfadeToken)return;
-    incoming.currentTime=0;
-    incoming.muted=false;
-    incoming.volume=0;
-    incoming.play().then(()=>{
-      if(token!==crossfadeToken){incoming.pause();return}
-      incoming.classList.add("active");
-      outgoing.classList.remove("active");
-      active=incoming; buffer=outgoing; current=n;
-      document.getElementById("title").textContent=tracks[current].name;
-      render(); loadSubtitles(tracks[current]);
-      userWantsPlayback=true;
-      const max=Number(volume.value),started=performance.now(),duration=760;
+  transitioning=true;
+  incoming.currentTime=0;
+  incoming.muted=!!doFade;
+  incoming.volume=doFade?0:Number(volume.value);
+  incoming.play().then(()=>{
+    if(token!==crossfadeToken){try{incoming.pause()}catch(e){};return}
+    incoming.classList.add("active");
+    outgoing.classList.remove("active");
+    active=incoming;buffer=outgoing;bufferTrackId="";current=n;
+    active.muted=false;active.volume=Number(volume.value);
+    document.getElementById("title").textContent=track.name;
+    render();loadSubtitles(track);userWantsPlayback=true;
+    syncPlayButtons();
+    if(doFade){
+      const max=Number(volume.value),started=performance.now(),duration=620;
       const fade=now=>{
         if(token!==crossfadeToken)return;
         const p=Math.min(1,(now-started)/duration);
-        active.volume=max*p;
-        outgoing.volume=max*(1-p);
-        if(p<1)requestAnimationFrame(fade);
-        else{
-          intentionalPause=true;
-          outgoing.pause();
-          outgoing.removeAttribute("src");
-          outgoing.load();
-          outgoing.muted=true; outgoing.volume=0;
-          intentionalPause=false;
-          transitioning=false; preload(); syncPlayButtons();
-        }
+        active.volume=max*p;outgoing.volume=max*(1-p);
+        if(p<1)requestAnimationFrame(fade);else finishTransition(outgoing);
       };
       requestAnimationFrame(fade);
-    }).catch((err)=>{
-      console.warn("Automatic next-track playback was rejected:",err);
-      transitioning=false;
-      incoming.pause();
-      incoming.muted=false;
-      incoming.volume=Number(volume.value);
-      current=n;
-      document.getElementById("title").textContent=tracks[current].name;
-      render();
-      loadSubtitles(tracks[current]);
-      setStatus("Sẵn sàng · Bấm ▶ để phát bài tiếp theo.",false,"ok");
-      syncPlayButtons();
-      preload();
-    });
-  };
-  if(incoming.readyState>=3)start();
-  else{incoming.addEventListener("canplay",start,{once:true});incoming.load()}
+    }else finishTransition(outgoing);
+  }).catch(err=>{
+    console.debug("Buffered next play deferred:",err?.name||err);
+    transitioning=false;
+    incoming.pause();incoming.muted=true;incoming.volume=0;
+    setStatus("Bài kế đã sẵn sàng · Bấm ▶ nếu trình duyệt yêu cầu.",false,"ok");
+    syncPlayButtons();
+  });
+  return true;
+}
+function finishTransition(outgoing){
+  try{outgoing.pause()}catch(e){}
+  outgoing.removeAttribute("src");outgoing.load();outgoing.muted=true;outgoing.volume=0;
+  outgoing.dataset.trackId="";
+  bufferTrackId="";
+  transitioning=false;
+  visual.classList.remove("buffering");
+  preload();syncPlayButtons();
+}
+function directNext(){
+  if(!tracks.length)return;
+  const n=getNext(),incoming=buffer,outgoing=active,track=tracks[n];
+
+  if(incoming.readyState>=2 && incoming.src && bufferTrackId===trackKey(track)){
+    outgoing.classList.remove("active");incoming.classList.add("active");
+    active=incoming;buffer=outgoing;bufferTrackId="";current=n;
+    active.currentTime=0;active.muted=false;active.volume=Number(volume.value);
+    document.getElementById("title").textContent=track.name;render();loadSubtitles(track);
+    userWantsPlayback=true;syncPlayButtons();
+    playActive({autoTransition:true});
+    return;
+  }
+  
+  clearVideo(outgoing);outgoing.dataset.trackId=trackKey(track);outgoing.src=mediaURL(track.id);outgoing.preload="metadata";
+  current=n;document.getElementById("title").textContent=track.name;render();loadSubtitles(track);
+  active.muted=false;active.volume=Number(volume.value);userWantsPlayback=true;
+  playActive({autoTransition:true});
+  preload();
+}
+function crossfade(){
+  if(transitioning||!tracks.length)return;
+  const n=getNext();
+
+  if(isMobilePlayback()){directNext();return;}
+  const next=tracks[n];
+  const ready=bufferTrackId===trackKey(next) && buffer.readyState>=3 && bufferedAhead(buffer)>=0.35;
+  if(ready){promoteBuffered(n,true);return;}
+
+  directNext();
 }
 function nextTrack(){if(!tracks.length)return;if(repeat){active.currentTime=0;playActive({autoTransition:true});return}crossfade()}
 function previousTrack(){if(!tracks.length)return;if(active.currentTime>5){active.currentTime=0;return}selectTrack(current-1,true)}
 function togglePlay(){
-  if(active.paused){
-    userWantsPlayback=true; intentionalPause=false;
-    playActive({fromGesture:true,autoTransition:false});
-  }else{
-    userWantsPlayback=false; intentionalPause=true; active.pause(); intentionalPause=false;
-  }
+  if(active.paused){userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true,autoTransition:false})}
+  else{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false}
 }
-function toggleShuffle(){shuffle=!shuffle;document.getElementById("shuffle").classList.toggle("active",shuffle);preload()}
+function toggleShuffle(){shuffle=!shuffle;document.getElementById("shuffle").classList.toggle("active",shuffle);bufferTrackId="";preload(true)}
 function toggleRepeat(){repeat=!repeat;document.getElementById("repeat").classList.toggle("active",repeat)}
-function update(){if(!active.duration)return;const p=active.currentTime/active.duration*100;videoProgress.value=p;videoProgress.style.setProperty("--video-value",p+"%");document.getElementById("current").textContent=fmt(active.currentTime);document.getElementById("duration").textContent=fmt(active.duration);videoTime.textContent=fmt(active.currentTime)+" / "+fmt(active.duration)}
+function update(){
+  if(!active.duration)return;
+  const p=active.currentTime/active.duration*100;
+  videoProgress.value=p;videoProgress.style.setProperty("--video-value",p+"%");
+  document.getElementById("current").textContent=fmt(active.currentTime);document.getElementById("duration").textContent=fmt(active.duration);videoTime.textContent=fmt(active.currentTime)+" / "+fmt(active.duration);
+ 
+  if(active.duration-active.currentTime<=18)preload();
+}
 function syncVolume(v){const val=Math.max(0,Math.min(1,Number(v)));active.volume=val;active.muted=val===0;buffer.volume=0;buffer.muted=true;videoVolume.value=val;volume.value=val;videoVolume.style.setProperty("--vol-value",(val*100)+"%");videoMute.classList.toggle("active",val===0);videoMute.setAttribute("aria-label",val===0?"Bật âm":"Tắt âm");videoMute.title=val===0?"Bật âm":"Tắt âm"}
-videoProgress.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(videoProgress.value)/100*active.duration});volume.addEventListener("input",()=>syncVolume(volume.value));videoVolume.addEventListener("input",()=>syncVolume(videoVolume.value));videoMute.addEventListener("click",()=>{if(active.volume>0){active.dataset.previousVolume=active.volume;syncVolume(0)}else syncVolume(Number(active.dataset.previousVolume||.9))});A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);function syncPlayButtons(){const playing=!active.paused;const main=document.getElementById("play");const mini=document.getElementById("videoPlay");const icon=playing?'<svg viewBox="0 0 24 24"><path d="M7 6v12M17 6v12"/></svg>':'<svg viewBox="0 0 24 24"><path d="M9 6v12l9-6z"/></svg>';main.innerHTML=icon;mini.innerHTML=icon;main.title=playing?"Tạm dừng":"Phát";mini.title=main.title}
-A.addEventListener("play",()=>{if(active===A){syncPlayButtons();preload();startSubtitleLoop()}});B.addEventListener("play",()=>{if(active===B){syncPlayButtons();preload();startSubtitleLoop()}});A.addEventListener("pause",()=>{if(active===A)syncPlayButtons()});B.addEventListener("pause",()=>{if(active===B)syncPlayButtons()});document.getElementById("play").onclick=togglePlay;videoPlay.onclick=togglePlay;document.getElementById("next").onclick=nextTrack;document.getElementById("prev").onclick=previousTrack;document.getElementById("shuffle").onclick=toggleShuffle;document.getElementById("repeat").onclick=toggleRepeat;document.getElementById("search").oninput=render;
+videoProgress.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(videoProgress.value)/100*active.duration});
+volume.addEventListener("input",()=>syncVolume(volume.value));videoVolume.addEventListener("input",()=>syncVolume(videoVolume.value));
+videoMute.addEventListener("click",()=>{if(active.volume>0){active.dataset.previousVolume=active.volume;syncVolume(0)}else syncVolume(Number(active.dataset.previousVolume||.9))});
+A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);
+function syncPlayButtons(){
+  const playing=!active.paused,main=document.getElementById("play"),mini=document.getElementById("videoPlay");
+  const icon=playing?'<svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.2v11.6L18.2 12 9 6.2z"/></svg>';
+  main.innerHTML=icon;mini.innerHTML=icon;main.title=playing?"Tạm dừng":"Phát";mini.title=main.title;
+}
+A.addEventListener("play",()=>{if(active===A){syncPlayButtons();preload();startSubtitleLoop()}});B.addEventListener("play",()=>{if(active===B){syncPlayButtons();preload();startSubtitleLoop()}});
+A.addEventListener("pause",()=>{if(active===A)syncPlayButtons()});B.addEventListener("pause",()=>{if(active===B)syncPlayButtons()});
+document.getElementById("play").onclick=togglePlay;videoPlay.onclick=togglePlay;document.getElementById("next").onclick=nextTrack;document.getElementById("prev").onclick=previousTrack;document.getElementById("shuffle").onclick=toggleShuffle;document.getElementById("repeat").onclick=toggleRepeat;document.getElementById("search").oninput=render;
 ccButton.addEventListener("click",e=>{e.stopPropagation();ccMenu.classList.toggle("open")});document.querySelectorAll(".cc-option").forEach(btn=>btn.addEventListener("click",()=>{toggleSubtitles(btn.dataset.sub==="on");ccMenu.classList.remove("open")}));document.addEventListener("click",e=>{if(!ccMenu.contains(e.target)&&e.target!==ccButton)ccMenu.classList.remove("open")});
 async function toggleFullscreen(){try{if(!document.fullscreenElement){if(visual.requestFullscreen)await visual.requestFullscreen();else if(visual.webkitRequestFullscreen)visual.webkitRequestFullscreen()}else{if(document.exitFullscreen)await document.exitFullscreen()}}catch(err){try{if(active.webkitEnterFullscreen)active.webkitEnterFullscreen()}catch(_){}}}
 fullscreenButton.addEventListener("click",toggleFullscreen);document.addEventListener("fullscreenchange",()=>{fullscreenButton.textContent=document.fullscreenElement?"✕":"⛶"});
-function scheduleResume(reason){
-  if(!userWantsPlayback || intentionalPause || !active || transitioning)return;
-  clearTimeout(resumeTimer);
-  resumeTimer=setTimeout(()=>{
-    if(!userWantsPlayback || intentionalPause || !active || !active.paused)return;
-    playActive({autoTransition:true});
-  }, reason==="visible"?80:250);
-}
-function handleVisibility(){
-  if(document.visibilityState==="visible"){
-    if(userWantsPlayback && active.paused) scheduleResume("visible");
-    syncPlayButtons();
-  }
-}
-function handlePageShow(){if(userWantsPlayback && active.paused)scheduleResume("pageshow")}
+
+function scheduleResume(reason){if(!userWantsPlayback||intentionalPause||!active||transitioning)return;clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{if(!userWantsPlayback||intentionalPause||!active||!active.paused)return;playActive({autoTransition:true})},reason==="visible"?120:500)}
+function handleVisibility(){if(document.visibilityState==="visible"){if(userWantsPlayback&&active.paused)scheduleResume("visible");syncPlayButtons()}}
+function handlePageShow(){if(userWantsPlayback&&active.paused)scheduleResume("pageshow")}
 function handleOnline(){const pill=document.getElementById("connectionPill"),text=document.getElementById("connectionText");pill.classList.add("online");pill.classList.remove("offline");text.textContent="ONLINE · STREAM READY"}
 function handleOffline(){const pill=document.getElementById("connectionPill"),text=document.getElementById("connectionText");pill.classList.remove("online");pill.classList.add("offline");text.textContent="OFFLINE · ĐANG CHỜ KẾT NỐI"}
-document.addEventListener("visibilitychange",handleVisibility);
-window.addEventListener("pageshow",handlePageShow);
-window.addEventListener("online",handleOnline);
-window.addEventListener("offline",handleOffline);
+document.addEventListener("visibilitychange",handleVisibility);window.addEventListener("pageshow",handlePageShow);window.addEventListener("online",handleOnline);window.addEventListener("offline",handleOffline);
+let waitingTimer=null;
 [A,B].forEach(v=>{
-  v.addEventListener("pause",()=>{
-    if(active===v){
-      syncPlayButtons();
-      if(document.visibilityState==="visible" && userWantsPlayback && !intentionalPause && !transitioning){
-        // Recover from transient network/browser pauses without fighting a real user pause.
-        scheduleResume("visible");
-      }
-      if(document.visibilityState==="hidden" && userWantsPlayback && !intentionalPause && !transitioning){
-        scheduleResume("hidden");
-      }
-    }
-  });
-  v.addEventListener("waiting",()=>{if(active===v)setStatus("Đang tải thêm video…",false);});
-  v.addEventListener("playing",()=>{if(active===v){setStatus("✓ Đang phát · HVL Stream",false,"ok");syncPlayButtons();}});
-  v.addEventListener("stalled",()=>{if(active===v && userWantsPlayback)scheduleResume("stalled")});
+  v.addEventListener("pause",()=>{if(active===v){syncPlayButtons();if(document.visibilityState==="visible"&&userWantsPlayback&&!intentionalPause&&!transitioning)scheduleResume("visible")}});
+  v.addEventListener("waiting",()=>{if(active!==v)return;clearTimeout(waitingTimer);waitingTimer=setTimeout(()=>{if(active===v&&!v.paused){visual.classList.add("buffering");setStatus("Đang đệm stream…",false)}},650)});
+  v.addEventListener("playing",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("✓ Đang phát · HVL Stream",false,"ok");syncPlayButtons()}});
+  v.addEventListener("canplay",()=>{if(active===v){visual.classList.remove("buffering");clearTimeout(waitingTimer)}});
+  v.addEventListener("stalled",()=>{if(active===v&&userWantsPlayback)scheduleResume("stalled")});
+  v.addEventListener("error",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("Stream gặp lỗi · đang thử kết nối lại…",true);if(userWantsPlayback)scheduleResume("error")}});
 });
 
 
 let uiHideTimer=null;
-function showVideoUI(){
-  const v=document.getElementById("visual");
-  if(!v)return;
-  v.classList.add("ui-controls");
-  clearTimeout(uiHideTimer);
-  uiHideTimer=setTimeout(()=>{
-    if(document.activeElement && v.contains(document.activeElement))return;
-    if(!ccMenu.classList.contains("open"))v.classList.remove("ui-controls");
-  }, window.matchMedia("(max-width:560px)").matches ? 3600 : 3000);
-}
+function showVideoUI(){const v=document.getElementById("visual");if(!v)return;v.classList.add("ui-controls");clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>{if(document.activeElement&&v.contains(document.activeElement))return;if(!ccMenu.classList.contains("open"))v.classList.remove("ui-controls")},window.matchMedia("(max-width:560px)").matches?3600:3000)}
 function keepVideoUI(e){showVideoUI();if(e)e.stopPropagation()}
 visual.addEventListener("pointermove",()=>{if(window.matchMedia("(hover:hover)").matches)showVideoUI()},{passive:true});
-visual.addEventListener("pointerdown",e=>{
-  if(window.matchMedia("(max-width:560px)").matches){
-    if(e.target.closest("button,input,.cc-menu")){showVideoUI();return}
-    if(!visual.classList.contains("ui-controls")){showVideoUI();return}
-  }
-},{passive:true});
-visual.addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").matches && !ccMenu.classList.contains("open")){clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>visual.classList.remove("ui-controls"),450)}});
-[videoProgress,videoPlay,videoMute,videoVolume,ccButton,fullscreenButton].forEach(el=>el.addEventListener("pointerdown",keepVideoUI,{passive:true}));
-ccMenu.addEventListener("pointerdown",keepVideoUI,{passive:true});
-fullscreenButton.addEventListener("click",()=>setTimeout(showVideoUI,80));
+visual.addEventListener("pointerdown",e=>{if(window.matchMedia("(max-width:560px)").matches){if(e.target.closest("button,input,.cc-menu")){showVideoUI();return}if(!visual.classList.contains("ui-controls")){showVideoUI();return}}},{passive:true});
+visual.addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").matches&&!ccMenu.classList.contains("open")){clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>visual.classList.remove("ui-controls"),450)}});
+[videoProgress,videoPlay,videoMute,videoVolume,ccButton,fullscreenButton].forEach(el=>el.addEventListener("pointerdown",keepVideoUI,{passive:true}));ccMenu.addEventListener("pointerdown",keepVideoUI,{passive:true});fullscreenButton.addEventListener("click",()=>setTimeout(showVideoUI,80));
 
 
-if("mediaSession" in navigator){
-  const setMediaSession=()=>{
-    const t=tracks[current];
-    if(!t)return;
-    try{
-      navigator.mediaSession.metadata=new MediaMetadata({title:t.name.replace(/\.mp4$/i,""),artist:"HVL",album:"HVL Album"});
-      navigator.mediaSession.setActionHandler("play",()=>{userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true,autoTransition:false})});
-      navigator.mediaSession.setActionHandler("pause",()=>{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false});
-      navigator.mediaSession.setActionHandler("nexttrack",nextTrack);
-      navigator.mediaSession.setActionHandler("previoustrack",previousTrack);
-      navigator.mediaSession.setActionHandler("seekbackward",()=>{active.currentTime=Math.max(0,active.currentTime-10)});
-      navigator.mediaSession.setActionHandler("seekforward",()=>{active.currentTime=Math.min(active.duration||0,active.currentTime+10)});
-    }catch(e){}
-  };
-  window._setMediaSession=setMediaSession;
-}
+if("mediaSession" in navigator){const setMediaSession=()=>{const t=tracks[current];if(!t)return;try{navigator.mediaSession.metadata=new MediaMetadata({title:t.name.replace(/\.mp4$/i,""),artist:"HVL",album:"HVL Album"});navigator.mediaSession.setActionHandler("play",()=>{userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true})});navigator.mediaSession.setActionHandler("pause",()=>{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false});navigator.mediaSession.setActionHandler("nexttrack",nextTrack);navigator.mediaSession.setActionHandler("previoustrack",previousTrack);navigator.mediaSession.setActionHandler("seekbackward",()=>{active.currentTime=Math.max(0,active.currentTime-10)});navigator.mediaSession.setActionHandler("seekforward",()=>{active.currentTime=Math.min(active.duration||0,active.currentTime+10)})}catch(e){}};window._setMediaSession=setMediaSession}
 
 async function loadPlaylist(){if(location.protocol==="file:"){setStatus("⚠ Hãy mở bằng GitHub Pages (https://...) hoặc localhost, không mở file:// trực tiếp.",true);return}if(!API_KEY||API_KEY==="DAN_API_KEY_CUA_BAN_VAO_DAY"){setStatus("⚠ Chưa nhập API_KEY trong phần CONFIG của file HTML.",true);return}setStatus("Đang tải playlist từ Google Drive…");tracks=[];render();try{let token="";do{const params=new URLSearchParams({q:"'"+FOLDER_ID+"' in parents and trashed=false and mimeType contains 'video/'",key:API_KEY,pageSize:"1000",fields:"nextPageToken,files(id,name,mimeType,resourceKey)"});if(token)params.set("pageToken",token);const r=await fetch("https://www.googleapis.com/drive/v3/files?"+params.toString());const d=await r.json();if(!r.ok)throw new Error((d.error&&d.error.message)||("HTTP "+r.status));tracks.push(...(d.files||[]));token=d.nextPageToken||""}while(token);tracks.sort((a,b)=>a.name.localeCompare(b.name,"vi",{numeric:true,sensitivity:"base"}));render();if(!tracks.length){setStatus("Không tìm thấy video trong folder. Kiểm tra quyền chia sẻ và MIME type.",true);return}setStatus("✓ "+tracks.length+" video · Subtitle-ready · Sẵn sàng phát",false,"ok");selectTrack(0,false)}catch(err){console.error(err);setStatus("❌ "+err.message,true)}}
 window.addEventListener("DOMContentLoaded",()=>{toggleSubtitles(true);syncVolume(.9);loadPlaylist()});
