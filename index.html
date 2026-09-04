@@ -26,7 +26,6 @@
 @media(max-width:930px){.app{padding:15px}.shell{grid-template-columns:1fr}.playlist{max-height:390px}.header{margin-bottom:15px}}
 @media(max-width:560px){.app{padding:10px 10px 5px}.card{border-radius:18px}.monogram{width:42px;height:42px;border-radius:13px}.brand-title{font-size:20px}.eyebrow{font-size:7px}.header-right{display:none}.now{padding:15px 15px 5px}.now-title h2{font-size:21px}.track-number{font-size:22px}.controls{padding:13px 10px 15px}.actions{gap:8px}.btn{width:39px;height:39px}.play-btn{width:53px;height:53px}.control-hint{font-size:8px;margin-top:8px}.hint-label{display:none}.side{padding:14px}.playlist{max-height:370px}.footer{padding-top:18px;font-size:8px;letter-spacing:.08em}.footer:before,.footer:after{width:22px;margin:0 8px}.subtitle-layer{width:92%;bottom:68px}.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;font-size:14px;padding:7px 11px 8px;border-radius:8px;line-height:1.32}.video-ui{padding:45px 9px 9px}.video-progress{height:3px;margin-bottom:8px}.vbtn{width:30px;height:29px;font-size:11px}.volume-mini input{width:54px}.vtime{font-size:8px;margin:0 2px}.cc-menu{right:40px;bottom:43px;width:185px}}
 
-/* HVL V3 polish + background playback resilience */
 html{background:#060606;scroll-behavior:smooth}
 body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
 button,input{touch-action:manipulation}
@@ -166,7 +165,6 @@ const API_KEY = "AIzaSyBv2xnFQxz5P6PEosKNKaO3BrV6a_pSfDY";
 const FOLDER_ID = "1ckf_j0cc-87VPG186w2Ilm003pt0ifjR";
 const SUBTITLE_BASE = "./subtitles/";
 const SUBTITLE_EXT = ".vtt";
-/* ========================================================== */
 const A=document.getElementById("videoA"),B=document.getElementById("videoB");
 const volume=document.getElementById("videoVolume");
 const statusEl=document.getElementById("status"),subtitleEl=document.getElementById("subtitle"),visual=document.getElementById("visual");
@@ -308,7 +306,6 @@ A.addEventListener("play",()=>{if(active===A){syncPlayButtons();preload();startS
 ccButton.addEventListener("click",e=>{e.stopPropagation();ccMenu.classList.toggle("open")});document.querySelectorAll(".cc-option").forEach(btn=>btn.addEventListener("click",()=>{toggleSubtitles(btn.dataset.sub==="on");ccMenu.classList.remove("open")}));document.addEventListener("click",e=>{if(!ccMenu.contains(e.target)&&e.target!==ccButton)ccMenu.classList.remove("open")});
 async function toggleFullscreen(){try{if(!document.fullscreenElement){if(visual.requestFullscreen)await visual.requestFullscreen();else if(visual.webkitRequestFullscreen)visual.webkitRequestFullscreen()}else{if(document.exitFullscreen)await document.exitFullscreen()}}catch(err){try{if(active.webkitEnterFullscreen)active.webkitEnterFullscreen()}catch(_){}}}
 fullscreenButton.addEventListener("click",toggleFullscreen);document.addEventListener("fullscreenchange",()=>{fullscreenButton.textContent=document.fullscreenElement?"✕":"⛶"});
-// --- Playback resilience: do not pause when the tab becomes hidden. ---
 function scheduleResume(reason){
   if(!userWantsPlayback || intentionalPause || !active || transitioning)return;
   clearTimeout(resumeTimer);
@@ -349,7 +346,6 @@ window.addEventListener("offline",handleOffline);
 });
 
 
-// --- V4 cinematic controls: hover on desktop, tap on mobile ---
 let uiHideTimer=null;
 function showVideoUI(){
   const v=document.getElementById("visual");
@@ -374,7 +370,7 @@ visual.addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").
 ccMenu.addEventListener("pointerdown",keepVideoUI,{passive:true});
 fullscreenButton.addEventListener("click",()=>setTimeout(showVideoUI,80));
 
-// Media Session gives mobile/desktop browsers proper lock-screen and headset controls.
+
 if("mediaSession" in navigator){
   const setMediaSession=()=>{
     const t=tracks[current];
