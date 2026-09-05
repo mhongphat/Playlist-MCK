@@ -54,6 +54,7 @@ button,input{touch-action:manipulation}
 
 
 
+
 .visual{--ui-hide-delay:2600ms}
 .video-ui{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none;transition:opacity .24s ease,transform .24s ease,visibility .24s ease}
 .visual:hover .video-ui,.visual:focus-within .video-ui,.visual.ui-controls .video-ui{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
@@ -123,12 +124,13 @@ button,input{touch-action:manipulation}
 }
 
 
+
 .play-btn{color:var(--cream)!important}.play-btn svg{color:var(--cream)!important}
 .video-ui{contain:layout paint}.visual video{contain:strict}
 .loading-sheen{position:absolute;inset:0;z-index:11;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(208,51,71,.07),transparent 38%);opacity:0;transition:opacity .25s ease}.visual.buffering .loading-sheen{opacity:1}
 @media(max-width:560px){.visual video{object-fit:contain}.subtitle{font-size:clamp(13px,3.8vw,16px)}}
 
-/* HVL V7 — stable mobile playback */
+
 .visual.mobile-single #videoB{display:none}
 .visual.mobile-single #videoA{opacity:1}
 .loading-item{pointer-events:none;opacity:.82}.skeleton-line{display:block;width:72%;height:9px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.14),rgba(255,255,255,.06));background-size:220% 100%;animation:hvlSkeleton 1.25s ease-in-out infinite}@keyframes hvlSkeleton{0%{background-position:120% 0}100%{background-position:-120% 0}}
@@ -143,7 +145,7 @@ button,input{touch-action:manipulation}
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
+<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER<</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
 <main class="shell">
 <section class="card">
 <div class="visual" id="visual">
@@ -241,7 +243,7 @@ function loadInto(video,track,force=false){
   video.dataset.trackId=key;
   if(isBuffer) bufferTrackId=key;
   video.src=mediaURL(track.id);
-  video.preload=isBuffer ? (isMobilePlayback()?"auto":"auto") : "metadata";
+  video.preload=isBuffer ? "none" : "metadata";
   video.playsInline=true;
   video.setAttribute("playsinline","");
   video.setAttribute("webkit-playsinline","");
@@ -256,6 +258,7 @@ function getNext(){
   return(current+1)%tracks.length;
 }
 function preload(force=false){
+  if(isMobilePlayback()) return;
   if(!tracks.length)return;
   const next=tracks[getNext()],key=trackKey(next);
   if(!force && bufferTrackId===key && buffer.src) return;
@@ -274,32 +277,92 @@ function preload(force=false){
 function bufferIsUsable(track){
   return !!track && bufferTrackId===trackKey(track) && !!buffer.src && buffer.readyState>=2;
 }
-async function playActive(opts={}){
-  const {fromGesture=false,autoTransition=false}=opts;
-  if(!active || !active.src) return false;
-  if(fromGesture){userWantsPlayback=true;intentionalPause=false}
-  try{
+async function playActive(opts={}) {
+  const fromGesture=!!opts.fromGesture;
+  const autoTransition=!!opts.autoTransition;
+  if(!active) return false;
+  const track=tracks[current];
+  if(!track) return false;
+
+  if(!active.src || active.dataset.trackId!==trackKey(track)) {
+    loadInto(active,track,true);
+  }
+
+  if(fromGesture) {
+    userWantsPlayback=true;
+    intentionalPause=false;
+  }
+
+  try {
     active.muted=false;
     active.volume=Number(volume.value);
-    const promise=active.play();
-    await promise;
-    if(active && !active.paused){
-      userWantsPlayback=true;
-      intentionalPause=false;
-      syncPlayButtons();
-      startSubtitleLoop();
-      setStatus("✓ Đang phát · HVL Stream",false,"ok");
-      return true;
+
+    if(active.readyState < 2) {
+      await waitForPlayable(active,10000);
     }
-  }catch(err){
-    console.debug("playActive deferred:",err?.name||err);
+
+    const p=active.play();
+    if(p && typeof p.then==='function') await p;
+
+    if(active.paused) throw new Error('PLAY_DID_NOT_START');
+
+    userWantsPlayback=true;
+    intentionalPause=false;
+    visual.classList.remove('buffering');
     syncPlayButtons();
-    if(fromGesture){
-      setStatus("⚠ Trình duyệt chưa cho phép phát. Hãy bấm Play lại một lần.",true);
+    startSubtitleLoop();
+    setStatus('✓ Đang phát · HVL Stream',false,'ok');
+    if(navigator.mediaSession) navigator.mediaSession.playbackState='playing';
+
+    if(!isMobilePlayback()) preload(false);
+    return true;
+  } catch(err) {
+    console.error('[HVL playback]',{
+      name:err?.name,
+      message:err?.message,
+      mediaError:active.error?.code,
+      readyState:active.readyState,
+      networkState:active.networkState,
+      src:active.currentSrc
+    });
+
+    if(err?.name==='NotAllowedError') {
+      setStatus('⚠ Trình duyệt yêu cầu thao tác Play trực tiếp. Hãy bấm Play một lần nữa.',true);
+    } else if(err?.name==='NotSupportedError' || active.error?.code===4) {
+      setStatus('❌ Stream video không được trình duyệt hỗ trợ. Kiểm tra Worker/Range/MIME.',true);
+    } else if(active.error?.code===2) {
+      setStatus('❌ Không tải được stream từ Google Drive. Đang chờ kết nối lại…',true);
+    } else if(active.error?.code===3) {
+      setStatus('❌ Video tải được nhưng không giải mã được.',true);
+    } else if(err?.message==='PLAY_DID_NOT_START') {
+      setStatus('⚠ Video chưa sẵn sàng. Hãy bấm Play lại.',true);
+    } else {
+      setStatus('❌ Không thể phát video: '+(err?.message||'lỗi không xác định'),true);
     }
+    syncPlayButtons();
     return false;
   }
-  return false;
+}
+
+function waitForPlayable(video,timeout=10000) {
+  return new Promise((resolve,reject)=>{
+    if(!video) return reject(new Error('VIDEO_ELEMENT_MISSING'));
+    if(video.readyState>=2) return resolve();
+    let done=false;
+    const cleanup=()=>{
+      clearTimeout(timer);
+      video.removeEventListener('loadeddata',ready);
+      video.removeEventListener('canplay',ready);
+      video.removeEventListener('error',failed);
+    };
+    const finish=(fn)=>{if(done)return;done=true;cleanup();fn();};
+    const ready=()=>finish(resolve);
+    const failed=()=>finish(()=>reject(new Error('MEDIA_LOAD_ERROR')));
+    const timer=setTimeout(()=>finish(()=>reject(new Error('MEDIA_LOAD_TIMEOUT'))),timeout);
+    video.addEventListener('loadeddata',ready,{once:true});
+    video.addEventListener('canplay',ready,{once:true});
+    video.addEventListener('error',failed,{once:true});
+  });
 }
 
 function selectTrack(index, shouldPlay=false){
@@ -348,7 +411,7 @@ function selectTrack(index, shouldPlay=false){
     userWantsPlayback=false;
     intentionalPause=false;
     // Metadata-only initial state: avoid opening two large Drive streams before the user plays.
-    if(!isMobilePlayback())preload(false);
+    if(!isMobilePlayback() && shouldPlay)preload(false);
   }
 }
 
@@ -402,9 +465,9 @@ function directNext(){
   if(!tracks.length)return;
   const n=getNext(),track=tracks[n];
   if(!track)return;
-  // Prefer a preloaded next stream on both desktop and mobile. It is never played while hidden.
-  if(bufferIsUsable(track)){
-    if(switchToBuffered(n,isMobilePlayback()?false:true))return;
+  // Mobile uses one visible video only. Desktop may promote the prepared buffer.
+  if(!isMobilePlayback() && bufferIsUsable(track)){
+    if(switchToBuffered(n,true))return;
   }
   // Last-resort fallback: load the next track on the currently visible element.
   // This is intentionally immediate; never wait forever for a hidden buffer.
