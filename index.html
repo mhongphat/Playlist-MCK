@@ -26,7 +26,7 @@
 @media(max-width:930px){.app{padding:15px}.shell{grid-template-columns:1fr}.playlist{max-height:390px}.header{margin-bottom:15px}}
 @media(max-width:560px){.app{padding:10px 10px 5px}.card{border-radius:18px}.monogram{width:42px;height:42px;border-radius:13px}.brand-title{font-size:20px}.eyebrow{font-size:7px}.header-right{display:none}.now{padding:15px 15px 5px}.now-title h2{font-size:21px}.track-number{font-size:22px}.controls{padding:13px 10px 15px}.actions{gap:8px}.btn{width:39px;height:39px}.play-btn{width:53px;height:53px}.control-hint{font-size:8px;margin-top:8px}.hint-label{display:none}.side{padding:14px}.playlist{max-height:370px}.footer{padding-top:18px;font-size:8px;letter-spacing:.08em}.footer:before,.footer:after{width:22px;margin:0 8px}.subtitle-layer{width:92%;bottom:68px}.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;font-size:14px;padding:7px 11px 8px;border-radius:8px;line-height:1.32}.video-ui{padding:45px 9px 9px}.video-progress{height:3px;margin-bottom:8px}.vbtn{width:30px;height:29px;font-size:11px}.volume-mini input{width:54px}.vtime{font-size:8px;margin:0 2px}.cc-menu{right:40px;bottom:43px;width:185px}}
 
-
+/* HVL V3 polish + background playback resilience */
 html{background:#060606;scroll-behavior:smooth}
 body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
 button,input{touch-action:manipulation}
@@ -54,7 +54,7 @@ button,input{touch-action:manipulation}
 
 
 
-
+/* ===================== HVL V4 — CINEMATIC CONTROL LAYER ===================== */
 .visual{--ui-hide-delay:2600ms}
 .video-ui{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none;transition:opacity .24s ease,transform .24s ease,visibility .24s ease}
 .visual:hover .video-ui,.visual:focus-within .video-ui,.visual.ui-controls .video-ui{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
@@ -124,13 +124,13 @@ button,input{touch-action:manipulation}
 }
 
 
-
+/* ===================== HVL V6 — PLAYBACK ENGINE POLISH ===================== */
 .play-btn{color:var(--cream)!important}.play-btn svg{color:var(--cream)!important}
 .video-ui{contain:layout paint}.visual video{contain:strict}
 .loading-sheen{position:absolute;inset:0;z-index:11;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(208,51,71,.07),transparent 38%);opacity:0;transition:opacity .25s ease}.visual.buffering .loading-sheen{opacity:1}
 @media(max-width:560px){.visual video{object-fit:contain}.subtitle{font-size:clamp(13px,3.8vw,16px)}}
 
-
+/* HVL V7 — stable mobile playback */
 .visual.mobile-single #videoB{display:none}
 .visual.mobile-single #videoA{opacity:1}
 .loading-item{pointer-events:none;opacity:.82}.skeleton-line{display:block;width:72%;height:9px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.14),rgba(255,255,255,.06));background-size:220% 100%;animation:hvlSkeleton 1.25s ease-in-out infinite}@keyframes hvlSkeleton{0%{background-position:120% 0}100%{background-position:-120% 0}}
@@ -145,7 +145,7 @@ button,input{touch-action:manipulation}
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER<</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
+<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
 <main class="shell">
 <section class="card">
 <div class="visual" id="visual">
@@ -233,20 +233,21 @@ function clearVideo(video){
   video.load();
   video.dataset.trackId="";
 }
-function loadInto(video,track,force=false){
+function loadInto(video,track,force=false,retryNonce=0){
   if(!track)return false;
   const isBuffer=video===buffer;
   const key=trackKey(track);
-  if(isBuffer && !force && bufferTrackId===key && video.src) return true;
-  if(!isBuffer && !force && video.dataset.trackId===key && video.src) return true;
+  if(isBuffer && !force && bufferTrackId===key && video.src)return true;
+  if(!isBuffer && !force && video.dataset.trackId===key && video.src)return true;
   clearVideo(video);
   video.dataset.trackId=key;
   if(isBuffer) bufferTrackId=key;
-  video.src=mediaURL(track.id);
-  video.preload=isBuffer ? "none" : "metadata";
+  const base=mediaURL(track.id);
+  video.src=retryNonce ? base + (base.includes('?')?'&':'?') + 'retry=' + retryNonce : base;
+  video.preload=isBuffer ? 'metadata' : 'auto';
   video.playsInline=true;
-  video.setAttribute("playsinline","");
-  video.setAttribute("webkit-playsinline","");
+  video.setAttribute('playsinline','');
+  video.setAttribute('webkit-playsinline','');
   video.muted=isBuffer;
   video.volume=isBuffer?0:Number(volume.value);
   video.load();
@@ -255,116 +256,101 @@ function loadInto(video,track,force=false){
 function getNext(){
   if(!tracks.length)return 0;
   if(shuffle&&tracks.length>1){let n=current;while(n===current)n=Math.floor(Math.random()*tracks.length);return n}
-  return(current+1)%tracks.length;
+  return(current+1)%tracks.length
 }
 function preload(force=false){
-  if(isMobilePlayback()) return;
+  if(isMobilePlayback())return;
   if(!tracks.length)return;
   const next=tracks[getNext()],key=trackKey(next);
-  if(!force && bufferTrackId===key && buffer.src) return;
+  if(!force&&bufferTrackId===key&&buffer.src)return;
   const token=++preloadToken;
   bufferReady=false;
   loadInto(buffer,next,force);
-  const onReady=()=>{
-    if(token!==preloadToken || bufferTrackId!==key)return;
-    bufferReady=true;
-    buffer.dataset.preloaded="1";
-    console.debug("HVL preload ready:",next.name);
-  };
-  buffer.addEventListener("canplay",onReady,{once:true});
-  buffer.addEventListener("loadeddata",()=>{if(token===preloadToken&&bufferTrackId===key)bufferReady=true},{once:true});
+  const onReady=()=>{if(token!==preloadToken||bufferTrackId!==key)return;bufferReady=true;buffer.dataset.preloaded='1';console.debug('HVL preload ready:',next.name)};
+  buffer.addEventListener('canplay',onReady,{once:true});
+  buffer.addEventListener('loadeddata',()=>{if(token===preloadToken&&bufferTrackId===key)bufferReady=true},{once:true});
 }
-function bufferIsUsable(track){
-  return !!track && bufferTrackId===trackKey(track) && !!buffer.src && buffer.readyState>=2;
-}
-async function playActive(opts={}) {
-  const fromGesture=!!opts.fromGesture;
-  const autoTransition=!!opts.autoTransition;
-  if(!active) return false;
+function bufferIsUsable(track){return !!track&&bufferTrackId===trackKey(track)&&!!buffer.src&&buffer.readyState>=2}
+
+let recoveryAttempts=0,recoveryTimer=null,recoveryBusy=false;
+function resetRecovery(){recoveryAttempts=0;clearTimeout(recoveryTimer);recoveryBusy=false}
+function mediaErrorLabel(v){const c=v?.error?.code;return c===1?'ABORTED':c===2?'NETWORK':c===3?'DECODE':c===4?'SRC_NOT_SUPPORTED':'UNKNOWN'}
+async function recoverStream(reason='error'){
+  if(!userWantsPlayback||intentionalPause||!active||transitioning||recoveryBusy)return false;
+  if(recoveryAttempts>=3)return false;
+  recoveryBusy=true;
   const track=tracks[current];
-  if(!track) return false;
-
-  if(!active.src || active.dataset.trackId!==trackKey(track)) {
-    loadInto(active,track,true);
-  }
-
-  if(fromGesture) {
-    userWantsPlayback=true;
-    intentionalPause=false;
-  }
-
-  try {
-    active.muted=false;
-    active.volume=Number(volume.value);
-
-    if(active.readyState < 2) {
-      await waitForPlayable(active,10000);
-    }
-
-    const p=active.play();
-    if(p && typeof p.then==='function') await p;
-
-    if(active.paused) throw new Error('PLAY_DID_NOT_START');
-
-    userWantsPlayback=true;
-    intentionalPause=false;
+  if(!track){recoveryBusy=false;return false}
+  const keepTime=Number.isFinite(active.currentTime)?active.currentTime:0;
+  const attempt=++recoveryAttempts;
+  setStatus(`Đang kết nối lại stream… (${attempt}/3)`,false);
+  console.warn('[HVL stream recovery]',{reason,attempt,track:track.name,time:keepTime,error:mediaErrorLabel(active)});
+  try{active.pause()}catch(e){}
+  try{
+    loadInto(active,track,true,attempt);
+    await waitForPlayable(active,9000);
+    if(keepTime>0 && Number.isFinite(active.duration) && keepTime<active.duration-0.5){try{active.currentTime=keepTime}catch(e){}}
+    active.muted=false;active.volume=Number(volume.value);
+    await active.play();
+    resetRecovery();
+    userWantsPlayback=true;intentionalPause=false;
     visual.classList.remove('buffering');
-    syncPlayButtons();
-    startSubtitleLoop();
-    setStatus('✓ Đang phát · HVL Stream',false,'ok');
-    if(navigator.mediaSession) navigator.mediaSession.playbackState='playing';
-
-    if(!isMobilePlayback()) preload(false);
+    setStatus('✓ Đã kết nối lại · HVL Stream',false,'ok');
+    syncPlayButtons();startSubtitleLoop();
+    if(!isMobilePlayback())preload(false);
     return true;
-  } catch(err) {
-    console.error('[HVL playback]',{
-      name:err?.name,
-      message:err?.message,
-      mediaError:active.error?.code,
-      readyState:active.readyState,
-      networkState:active.networkState,
-      src:active.currentSrc
-    });
-
-    if(err?.name==='NotAllowedError') {
-      setStatus('⚠ Trình duyệt yêu cầu thao tác Play trực tiếp. Hãy bấm Play một lần nữa.',true);
-    } else if(err?.name==='NotSupportedError' || active.error?.code===4) {
-      setStatus('❌ Stream video không được trình duyệt hỗ trợ. Kiểm tra Worker/Range/MIME.',true);
-    } else if(active.error?.code===2) {
-      setStatus('❌ Không tải được stream từ Google Drive. Đang chờ kết nối lại…',true);
-    } else if(active.error?.code===3) {
-      setStatus('❌ Video tải được nhưng không giải mã được.',true);
-    } else if(err?.message==='PLAY_DID_NOT_START') {
-      setStatus('⚠ Video chưa sẵn sàng. Hãy bấm Play lại.',true);
-    } else {
-      setStatus('❌ Không thể phát video: '+(err?.message||'lỗi không xác định'),true);
+  }catch(err){
+    recoveryBusy=false;
+    console.warn('[HVL stream recovery failed]',{attempt,name:err?.name,message:err?.message,error:mediaErrorLabel(active)});
+    if(recoveryAttempts<3){
+      const delay=900*attempt;
+      clearTimeout(recoveryTimer);
+      recoveryTimer=setTimeout(()=>recoverStream('retry'),delay);
+      return false;
     }
-    syncPlayButtons();
+    setStatus('❌ Stream không ổn định. Hãy thử Play lại hoặc đổi bài.',true);
     return false;
   }
 }
-
-function waitForPlayable(video,timeout=10000) {
+async function playActive(opts={}){
+  const fromGesture=!!opts.fromGesture;
+  if(!active)return false;
+  const track=tracks[current];if(!track)return false;
+  if(fromGesture){userWantsPlayback=true;intentionalPause=false;resetRecovery()}
+  if(!active.src||active.dataset.trackId!==trackKey(track))loadInto(active,track,true);
+  try{
+    active.muted=false;active.volume=Number(volume.value);
+    if(active.readyState<2)await waitForPlayable(active,10000);
+    const p=active.play();if(p&&typeof p.then==='function')await p;
+    if(active.paused)throw new Error('PLAY_DID_NOT_START');
+    userWantsPlayback=true;intentionalPause=false;resetRecovery();
+    visual.classList.remove('buffering');syncPlayButtons();startSubtitleLoop();
+    setStatus('✓ Đang phát · HVL Stream',false,'ok');
+    if(navigator.mediaSession)navigator.mediaSession.playbackState='playing';
+    if(!isMobilePlayback())preload(false);
+    return true;
+  }catch(err){
+    console.error('[HVL playback]',{name:err?.name,message:err?.message,mediaError:active.error?.code,readyState:active.readyState,networkState:active.networkState,src:active.currentSrc});
+    if(err?.name==='NotAllowedError')setStatus('⚠ Hãy bấm Play trực tiếp một lần để bắt đầu.',true);
+    else if(active.error?.code===3||err?.name==='NotSupportedError'||active.error?.code===4)setStatus('❌ Video không giải mã được hoặc định dạng không được hỗ trợ.',true);
+    else if(err?.message==='PLAY_DID_NOT_START')setStatus('⚠ Video chưa sẵn sàng. Hãy bấm Play lại.',true);
+    else if(userWantsPlayback&&!fromGesture)recoverStream('play-error');
+    else setStatus('❌ Không thể phát stream. Hãy thử Play lại.',true);
+    syncPlayButtons();return false;
+  }
+}
+function waitForPlayable(video,timeout=10000){
   return new Promise((resolve,reject)=>{
-    if(!video) return reject(new Error('VIDEO_ELEMENT_MISSING'));
-    if(video.readyState>=2) return resolve();
+    if(!video)return reject(new Error('VIDEO_ELEMENT_MISSING'));
+    if(video.readyState>=2)return resolve();
     let done=false;
-    const cleanup=()=>{
-      clearTimeout(timer);
-      video.removeEventListener('loadeddata',ready);
-      video.removeEventListener('canplay',ready);
-      video.removeEventListener('error',failed);
-    };
-    const finish=(fn)=>{if(done)return;done=true;cleanup();fn();};
-    const ready=()=>finish(resolve);
-    const failed=()=>finish(()=>reject(new Error('MEDIA_LOAD_ERROR')));
+    const cleanup=()=>{clearTimeout(timer);video.removeEventListener('loadeddata',ready);video.removeEventListener('canplay',ready);video.removeEventListener('error',failed)};
+    const finish=fn=>{if(done)return;done=true;cleanup();fn()};
+    const ready=()=>finish(resolve);const failed=()=>finish(()=>reject(new Error('MEDIA_LOAD_ERROR')));
     const timer=setTimeout(()=>finish(()=>reject(new Error('MEDIA_LOAD_TIMEOUT'))),timeout);
-    video.addEventListener('loadeddata',ready,{once:true});
-    video.addEventListener('canplay',ready,{once:true});
-    video.addEventListener('error',failed,{once:true});
+    video.addEventListener('loadeddata',ready,{once:true});video.addEventListener('canplay',ready,{once:true});video.addEventListener('error',failed,{once:true});
   });
 }
-
 function selectTrack(index, shouldPlay=false){
   if(!tracks.length)return;
   const n=Math.max(0,Math.min(tracks.length-1,index));
@@ -532,12 +518,20 @@ function handleOffline(){const pill=document.getElementById("connectionPill"),te
 document.addEventListener("visibilitychange",handleVisibility);window.addEventListener("pageshow",handlePageShow);window.addEventListener("online",handleOnline);window.addEventListener("offline",handleOffline);
 let waitingTimer=null;
 [A,B].forEach(v=>{
-  v.addEventListener("pause",()=>{if(active===v){syncPlayButtons();if(document.visibilityState==="visible"&&userWantsPlayback&&!intentionalPause&&!transitioning)scheduleResume("visible")}});
-  v.addEventListener("waiting",()=>{if(active!==v)return;clearTimeout(waitingTimer);waitingTimer=setTimeout(()=>{if(active===v&&!v.paused){visual.classList.add("buffering");setStatus("Đang đệm stream…",false)}},650)});
-  v.addEventListener("playing",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("✓ Đang phát · HVL Stream",false,"ok");syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState="playing"}});
-  v.addEventListener("canplay",()=>{if(active===v){visual.classList.remove("buffering");clearTimeout(waitingTimer)}});
-  v.addEventListener("stalled",()=>{if(active===v&&userWantsPlayback)scheduleResume("stalled")});
-  v.addEventListener("error",()=>{if(active===v){clearTimeout(waitingTimer);visual.classList.remove("buffering");setStatus("Stream gặp lỗi · đang thử kết nối lại…",true);if(userWantsPlayback)scheduleResume("error")}});
+  v.addEventListener('pause',()=>{if(active===v){syncPlayButtons();if(document.visibilityState==='visible'&&userWantsPlayback&&!intentionalPause&&!transitioning&&!recoveryBusy)scheduleResume('visible')}});
+  v.addEventListener('waiting',()=>{if(active!==v)return;clearTimeout(waitingTimer);waitingTimer=setTimeout(()=>{if(active===v&&!v.paused){visual.classList.add('buffering');setStatus('Đang đệm stream…',false)}},650)});
+  v.addEventListener('playing',()=>{if(active===v){clearTimeout(waitingTimer);resetRecovery();visual.classList.remove('buffering');setStatus('✓ Đang phát · HVL Stream',false,'ok');syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState='playing'}});
+  v.addEventListener('canplay',()=>{if(active===v){visual.classList.remove('buffering');clearTimeout(waitingTimer)}});
+  v.addEventListener('stalled',()=>{if(active===v&&userWantsPlayback&&!intentionalPause)recoverStream('stalled')});
+  v.addEventListener('error',()=>{
+    if(active!==v)return;
+    clearTimeout(waitingTimer);visual.classList.remove('buffering');
+    const code=v.error?.code;
+    console.warn('[HVL media error]',{code,label:mediaErrorLabel(v),networkState:v.networkState,readyState:v.readyState,src:v.currentSrc});
+    if(!userWantsPlayback||intentionalPause)return;
+    if(code===3||code===4){setStatus('❌ Video không giải mã được hoặc stream không được hỗ trợ.',true);return}
+    recoverStream('media-error');
+  });
 });
 
 // --- Cinematic controls ---
