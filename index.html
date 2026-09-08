@@ -992,52 +992,5 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 </script>
 </body>
 </html>
-```
 
----
 
-### Đã nâng cấp gì
-
-| Hạng mục | Chi tiết |
-|----------|----------|
-| **Giao diện** | Vibe HVL/MCK: đen sâu + đỏ rượu, typography Cormorant, glass card, glow nhẹ |
-| **Animation** | Fade-in khi load, hover mượt, pulse live, loading spinner |
-| **Mobile** | Responsive đầy đủ, safe-area, controls luôn hiện trên touch, playlist cuộn tốt |
-| **Phụ đề** | Đã có sẵn — đặt file `.vtt` trong `./subtitles/` (tên trùng video, ví dụ `1.Elegie.vtt`) |
-| **UX** | Keyboard (Space, ←→, ↑↓, M, F, N, P), Media Session, buffer bar, recovery |
-
----
-
-### Phụ đề — cách thêm
-
-1. Tạo thư mục `subtitles/` cùng cấp với `index.html`.
-2. File VTT đặt tên **trùng tên video** (bỏ `.mp4`):
-   - Video: `1.Elegie.mp4` → phụ đề: `1.Elegie.vtt`
-   - Video: `7.MẮT MÔI TAY CHÂN - MCK ft. TAGE (OFFICIAL MUSIC VIDEO).mp4` → `7.MẮT MÔI TAY CHÂN - MCK ft. TAGE (OFFICIAL MUSIC VIDEO).vtt`
-3. Format VTT mẫu:
-
-```vtt
-WEBVTT
-
-00:00:01.000 --> 00:00:04.500
-Lời dòng 1
-
-00:00:05.000 --> 00:00:08.200
-Lời dòng 2
-```
-
-Nút **CC** trên player để bật/tắt phụ đề.
-
----
-
-### Mobile
-
-**Đã dùng được trên điện thoại.**  
-- `playsinline` + viewport + safe-area  
-- Controls luôn hiện trên màn hình cảm ứng  
-- Layout 1 cột dưới 960px  
-- Nên test trên Safari iOS và Chrome Android  
-
-Nếu muốn đẩy cảm giác “album art / visual experience” hơn nữa (background blur theo màu video, waveform…), nói mình làm tiếp bước 2.  
-
-Copy file trên → thay `index.html` → hard refresh là xong.
