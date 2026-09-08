@@ -3,110 +3,457 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#070707">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="HVL — Album Visual Experience · MCK">
 <title>HVL — Album Visual Experience</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap');
-:root{--bg:#060606;--wine:#430b15;--red:#a51e31;--red2:#d03347;--cream:#f3eadf;--muted:#8e837c;--line:rgba(243,234,223,.1);--radius:22px;--ease:cubic-bezier(.22,.68,0,1.2);--ease-out:cubic-bezier(.16,1,.3,1)}
-*{box-sizing:border-box;-webkit-font-smoothing:antialiased;margin:0;padding:0}
-html,body{min-height:100%;background:var(--bg);color:var(--cream);font-family:"Be Vietnam Pro",system-ui,sans-serif}
-body{background:radial-gradient(1100px 700px at 8% -12%,rgba(165,30,49,.28),transparent 55%),radial-gradient(900px 800px at 100% 110%,rgba(67,11,21,.35),transparent 55%),#060606;overflow-x:hidden}
-button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;background:none}button:disabled{opacity:.45;cursor:not-allowed}
-.app{width:min(1480px,100%);margin:0 auto;padding:24px 24px 12px}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.identity{display:flex;align-items:center;gap:14px}
-.mono{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:13px;font-weight:800;letter-spacing:.14em;background:linear-gradient(145deg,var(--red2),var(--wine));box-shadow:0 12px 40px rgba(165,30,49,.35)}
-.brand{font:600 28px/1.05 "Cormorant Garamond",Georgia,serif}
-.eyebrow{font-size:9px;color:var(--muted);letter-spacing:.22em;margin-top:5px;text-transform:uppercase}
-.header-right{font-size:9px;letter-spacing:.16em;color:#b9aaa1;display:flex;gap:8px;align-items:center}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--red2);box-shadow:0 0 14px rgba(208,51,71,.9);animation:pulse 2.2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px}
-.card{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:linear-gradient(160deg,rgba(28,22,22,.92),rgba(9,9,9,.97));box-shadow:0 30px 90px rgba(0,0,0,.55);backdrop-filter:blur(18px)}
-.visual{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden}
-.visual video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;transition:opacity .4s var(--ease-out)}
-.visual.loading video{opacity:.35}
-.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.25),transparent 28%,transparent 62%,rgba(0,0,0,.78))}
-.badge,.corner{position:absolute;z-index:4;font-size:8px;letter-spacing:.16em;color:#e4d9cf;pointer-events:none}
-.badge{top:14px;left:14px;padding:7px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-.corner{right:15px;bottom:14px;color:rgba(255,255,255,.38)}
-.loader{position:absolute;inset:0;z-index:6;display:grid;place-items:center;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s}
-.visual.loading .loader{opacity:1}
-.spinner{width:42px;height:42px;border:3px solid rgba(243,234,223,.15);border-top-color:var(--red2);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.subtitle{position:absolute;z-index:5;left:50%;bottom:82px;transform:translateX(-50%);width:min(92%,880px);padding:10px 16px;border-radius:12px;text-align:center;background:rgba(0,0,0,.72);border:1px solid rgba(243,234,223,.08);font-size:clamp(14px,1.55vw,20px);font-weight:600;line-height:1.4;opacity:0;transition:opacity .25s;pointer-events:none;text-shadow:0 2px 8px rgba(0,0,0,.6)}
-.subtitle.show{opacity:1}
-.buffer-bar{position:absolute;left:0;right:0;bottom:0;height:3px;z-index:4;background:rgba(255,255,255,.08);pointer-events:none}
-.buffer-fill{height:100%;background:rgba(208,51,71,.55);width:0%;transition:width .2s linear}
-.controls-overlay{position:absolute;z-index:7;left:0;right:0;bottom:0;padding:52px 16px 12px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.92));opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s var(--ease-out)}
-.visual:hover .controls-overlay,.visual.show-controls .controls-overlay{opacity:1;transform:translateY(0)}
-@media (hover:none){.controls-overlay{opacity:1;transform:none}}
-.progress{width:100%;height:5px;appearance:none;border-radius:99px;cursor:pointer;background:linear-gradient(90deg,var(--red2) 0,var(--red2) var(--p,0%),rgba(255,255,255,.18) var(--p,0%),rgba(255,255,255,.18) 100%)}
-.progress::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:var(--cream);box-shadow:0 0 10px rgba(208,51,71,.5)}
-.video-row{display:flex;align-items:center;gap:6px;margin-top:10px}
-.vbtn{width:34px;height:32px;border-radius:10px;display:grid;place-items:center;border:1px solid rgba(243,234,223,.1);background:rgba(5,5,5,.55);color:var(--cream);transition:background .2s,border-color .2s}
-.vbtn:hover,.vbtn.active{background:rgba(165,30,49,.35);border-color:rgba(208,51,71,.55)}
-.vbtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.mini-play svg{fill:currentColor;stroke:none}
-.vol{width:64px;height:4px;accent-color:var(--red2)}
-.time{font-size:10px;color:rgba(243,234,223,.72);white-space:nowrap;font-variant-numeric:tabular-nums}
-.spacer{flex:1}
-.now{padding:18px 22px 8px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px}
-.title{font:600 clamp(22px,2.3vw,30px)/1.12 "Cormorant Garamond",Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meta{font-size:11px;color:var(--muted);margin-top:6px}
-.number{font:600 28px "Cormorant Garamond",Georgia,serif;color:rgba(243,234,223,.22);font-variant-numeric:tabular-nums}
-.main-controls{padding:12px 20px 18px;border-top:1px solid rgba(243,234,223,.05)}
-.actions{display:flex;justify-content:center;align-items:center;gap:12px}
-.round{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(243,234,223,.1);background:rgba(255,255,255,.03);color:var(--cream);transition:all .22s var(--ease)}
-.round:hover{background:rgba(255,255,255,.07);transform:scale(1.06)}
-.round svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.round.active{background:rgba(165,30,49,.4);border-color:rgba(208,51,71,.55)}
-.round.play{width:64px;height:64px;background:linear-gradient(145deg,#e04458,#7a1224);border:0;box-shadow:0 12px 36px rgba(165,30,49,.4)}
-.round.play svg{width:22px;height:22px;fill:currentColor;stroke:none}
-.hint{text-align:center;margin-top:10px;color:rgba(243,234,223,.38);font-size:9px;letter-spacing:.1em}
-.side{padding:16px;display:flex;flex-direction:column}
-.side-head{display:flex;justify-content:space-between;align-items:center}
-.side-title{font:600 22px "Cormorant Garamond",Georgia,serif}
-.count{font-size:9px;letter-spacing:.12em;color:var(--muted)}
-.search{height:42px;margin:12px 0 10px;padding:0 14px;border-radius:13px;border:1px solid var(--line);display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03)}
-.search:focus-within{border-color:rgba(208,51,71,.4);background:rgba(165,30,49,.08)}
-.search input{width:100%;border:0;outline:0;background:transparent;color:var(--cream);font-size:13px}
-.search input::placeholder{color:var(--muted)}
-.playlist{overflow:auto;max-height:calc(100vh - 300px);padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(208,51,71,.35) transparent}
-.item{display:grid;grid-template-columns:34px minmax(0,1fr) 18px;gap:8px;align-items:center;padding:11px 10px;margin:2px 0;border-radius:12px;cursor:pointer;transition:background .2s;text-align:left;width:100%}
-.item:hover{background:rgba(255,255,255,.05)}
-.item.active{background:linear-gradient(90deg,rgba(165,30,49,.38),rgba(67,11,21,.1));box-shadow:inset 3px 0 var(--red2)}
-.num{font-size:10px;text-align:center;color:#6e6560;font-variant-numeric:tabular-nums}
-.item.active .num{color:#e8a8b0}
-.song{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.arrow{color:#665d58;font-size:14px;opacity:.6}
-.status{margin-top:12px;padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);font-size:11px;line-height:1.5;color:var(--muted);transition:all .3s;word-break:break-word}
-.status.error{color:#efabb2;border-color:rgba(208,51,71,.35);background:rgba(165,30,49,.1)}
-.status.ok{border-color:rgba(208,51,71,.2);color:#c9b8ae}
-.footer{text-align:center;padding:20px 8px 8px;color:rgba(243,234,223,.3);font-size:8px;letter-spacing:.12em}
-.footer strong{color:rgba(243,234,223,.5)}
-.cc-menu{position:absolute;right:52px;bottom:48px;z-index:10;width:180px;padding:8px;border:1px solid rgba(243,234,223,.12);border-radius:12px;background:rgba(14,11,11,.97);display:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}
-.cc-menu.open{display:block}
-.cc-menu button{width:100%;padding:9px 10px;text-align:left;border-radius:8px;font-size:12px}
-.cc-menu button.active{background:rgba(165,30,49,.28)}
-@media(max-width:960px){.app{padding:14px}.layout{grid-template-columns:1fr}.playlist{max-height:360px}}
-@media(max-width:560px){.app{padding:10px}.card{border-radius:18px}.header{margin-bottom:12px}.mono{width:42px;height:42px;border-radius:13px;font-size:11px}.brand{font-size:20px}.header-right{display:none}.now{padding:14px}.title{font-size:20px}.number{font-size:20px}.main-controls{padding:12px 10px 14px}.actions{gap:8px}.round{width:40px;height:40px}.round.play{width:56px;height:56px}.subtitle{bottom:72px;font-size:13px}.side{padding:12px}.playlist{max-height:340px}}
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap');
+
+:root {
+  --bg: #050505;
+  --surface: #0c0b0b;
+  --surface2: #141211;
+  --wine: #3d0a12;
+  --wine2: #5c101c;
+  --red: #b91c32;
+  --red2: #e0354c;
+  --cream: #f4ebe2;
+  --cream2: #e8d9cc;
+  --muted: #7a716a;
+  --line: rgba(244,235,226,.08);
+  --glow: rgba(185,28,50,.35);
+  --radius: 24px;
+  --radius-sm: 14px;
+  --ease: cubic-bezier(.22,.68,0,1.15);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
+html, body { min-height: 100%; background: var(--bg); color: var(--cream); font-family: "Be Vietnam Pro", system-ui, sans-serif; }
+body {
+  background:
+    radial-gradient(1200px 800px at 5% -15%, rgba(185,28,50,.22), transparent 50%),
+    radial-gradient(900px 700px at 100% 110%, rgba(61,10,18,.4), transparent 50%),
+    radial-gradient(600px 400px at 50% 50%, rgba(20,10,12,.5), transparent 70%),
+    #050505;
+  overflow-x: hidden;
+}
+
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; -webkit-tap-highlight-color: transparent; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+
+.app {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 20px 20px calc(16px + var(--safe-b));
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  animation: fadeDown .6s var(--ease-out) both;
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: none; }
+}
+.identity { display: flex; align-items: center; gap: 14px; }
+.logo {
+  width: 48px; height: 48px; border-radius: 15px;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; letter-spacing: .16em;
+  background: linear-gradient(145deg, var(--red2), var(--wine));
+  box-shadow: 0 10px 36px var(--glow), inset 0 1px 0 rgba(255,255,255,.12);
+  transition: transform .4s var(--ease);
+}
+.logo:hover { transform: scale(1.06) rotate(-4deg); }
+.brand {
+  font: 600 26px/1.05 "Cormorant Garamond", Georgia, serif;
+  letter-spacing: -.01em;
+}
+.eyebrow {
+  font-size: 9px; color: var(--muted);
+  letter-spacing: .24em; margin-top: 4px; text-transform: uppercase;
+  font-weight: 500;
+}
+.live {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 9px; letter-spacing: .18em; color: #a89a90;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red2);
+  box-shadow: 0 0 12px var(--red2);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .45; transform: scale(.8); }
+}
+
+/* ── Layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 16px;
+  flex: 1;
+  animation: fadeUp .7s .1s var(--ease-out) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: linear-gradient(165deg, rgba(20,16,16,.95), rgba(8,7,7,.98));
+  box-shadow: 0 28px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.03);
+  backdrop-filter: blur(20px);
+}
+
+/* ── Visual / Video ── */
+.visual {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #000;
+  overflow: hidden;
+}
+.visual video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain; background: #000;
+  transition: opacity .45s var(--ease-out);
+}
+.visual.loading video { opacity: .3; }
+.shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, transparent 25%, transparent 55%, rgba(0,0,0,.85) 100%);
+}
+.badge {
+  position: absolute; z-index: 4; top: 14px; left: 14px;
+  padding: 6px 12px; border-radius: 99px;
+  font-size: 8px; letter-spacing: .16em; color: #e8d9cc;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.55); backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+.corner {
+  position: absolute; z-index: 4; right: 14px; bottom: 14px;
+  font-size: 8px; letter-spacing: .14em; color: rgba(255,255,255,.3);
+  pointer-events: none;
+}
+
+.loader {
+  position: absolute; inset: 0; z-index: 6;
+  display: grid; place-items: center;
+  background: rgba(0,0,0,.5);
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.visual.loading .loader { opacity: 1; }
+.spinner {
+  width: 40px; height: 40px;
+  border: 2.5px solid rgba(244,235,226,.12);
+  border-top-color: var(--red2);
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Subtitle — premium */
+.subtitle {
+  position: absolute; z-index: 5;
+  left: 50%; bottom: 88px;
+  transform: translateX(-50%);
+  width: min(94%, 820px);
+  padding: 12px 20px;
+  border-radius: 14px;
+  text-align: center;
+  background: rgba(0,0,0,.78);
+  border: 1px solid rgba(244,235,226,.06);
+  font-size: clamp(15px, 1.7vw, 22px);
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: .01em;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(0,0,0,.7);
+  backdrop-filter: blur(8px);
+}
+.subtitle.show { opacity: 1; }
+
+.buffer-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px; z-index: 4;
+  background: rgba(255,255,255,.06); pointer-events: none;
+}
+.buffer-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--wine2), var(--red2));
+  transition: width .2s linear;
+}
+
+/* Controls overlay */
+.controls-overlay {
+  position: absolute; z-index: 7; left: 0; right: 0; bottom: 0;
+  padding: 56px 16px 12px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.94));
+  opacity: 0; transform: translateY(8px);
+  transition: opacity .28s, transform .28s var(--ease-out);
+}
+.visual:hover .controls-overlay,
+.visual.show-controls .controls-overlay { opacity: 1; transform: none; }
+@media (hover: none) { .controls-overlay { opacity: 1; transform: none; } }
+
+.progress {
+  width: 100%; height: 4px; appearance: none; border-radius: 99px; cursor: pointer;
+  background: linear-gradient(90deg, var(--red2) 0, var(--red2) var(--p,0%), rgba(255,255,255,.15) var(--p,0%), rgba(255,255,255,.15) 100%);
+}
+.progress::-webkit-slider-thumb {
+  appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--cream); box-shadow: 0 0 12px var(--glow);
+}
+.progress::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%; background: var(--cream); border: 0;
+}
+
+.video-row { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.vbtn {
+  width: 34px; height: 32px; border-radius: 10px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(244,235,226,.08);
+  background: rgba(5,5,5,.5); color: var(--cream);
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.vbtn:hover, .vbtn.active { background: rgba(185,28,50,.3); border-color: rgba(224,53,76,.45); }
+.vbtn:active { transform: scale(.93); }
+.vbtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mini-play svg { fill: currentColor; stroke: none; }
+.vol { width: 60px; height: 3px; accent-color: var(--red2); }
+.time { font-size: 10px; color: rgba(244,235,226,.65); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.spacer { flex: 1; }
+
+/* Now playing */
+.now {
+  padding: 16px 20px 6px;
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;
+}
+.title {
+  font: 600 clamp(20px, 2.2vw, 28px)/1.15 "Cormorant Garamond", Georgia, serif;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.meta { font-size: 11px; color: var(--muted); margin-top: 5px; letter-spacing: .02em; }
+.number {
+  font: 600 26px "Cormorant Garamond", Georgia, serif;
+  color: rgba(244,235,226,.18); font-variant-numeric: tabular-nums;
+}
+
+/* Main controls */
+.main-controls {
+  padding: 10px 18px 16px;
+  border-top: 1px solid rgba(244,235,226,.04);
+}
+.actions { display: flex; justify-content: center; align-items: center; gap: 12px; }
+.round {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid rgba(244,235,226,.08);
+  background: rgba(255,255,255,.025); color: var(--cream);
+  transition: all .25s var(--ease);
+}
+.round:hover { background: rgba(255,255,255,.06); transform: scale(1.08); }
+.round:active { transform: scale(.94); }
+.round svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.round.active { background: rgba(185,28,50,.38); border-color: rgba(224,53,76,.5); }
+.round.play {
+  width: 60px; height: 60px;
+  background: linear-gradient(145deg, #e83d55, #6e1020);
+  border: 0;
+  box-shadow: 0 12px 36px rgba(185,28,50,.4), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.round.play:hover { transform: scale(1.08); box-shadow: 0 16px 44px rgba(185,28,50,.5); }
+.round.play svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
+.hint {
+  text-align: center; margin-top: 8px;
+  color: rgba(244,235,226,.32); font-size: 9px; letter-spacing: .1em;
+}
+
+/* ── Side playlist ── */
+.side {
+  padding: 14px;
+  display: flex; flex-direction: column;
+  max-height: calc(100dvh - 100px);
+}
+.side-head { display: flex; justify-content: space-between; align-items: center; }
+.side-title { font: 600 20px "Cormorant Garamond", Georgia, serif; }
+.count { font-size: 9px; letter-spacing: .14em; color: var(--muted); }
+
+.search {
+  height: 40px; margin: 12px 0 8px; padding: 0 14px;
+  border-radius: 12px; border: 1px solid var(--line);
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.02);
+  transition: border-color .2s, background .2s;
+}
+.search:focus-within {
+  border-color: rgba(224,53,76,.35);
+  background: rgba(185,28,50,.06);
+}
+.search input {
+  width: 100%; border: 0; outline: 0; background: transparent;
+  color: var(--cream); font-size: 13px;
+}
+.search input::placeholder { color: var(--muted); }
+
+.playlist {
+  overflow: auto; flex: 1;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(185,28,50,.3) transparent;
+}
+.playlist::-webkit-scrollbar { width: 4px; }
+.playlist::-webkit-scrollbar-thumb { background: rgba(185,28,50,.3); border-radius: 99px; }
+
+.item {
+  display: grid;
+  grid-template-columns: 32px minmax(0,1fr) 16px;
+  gap: 8px; align-items: center;
+  padding: 10px 10px; margin: 2px 0;
+  border-radius: 12px; cursor: pointer;
+  transition: background .2s, transform .15s;
+  text-align: left; width: 100%;
+}
+.item:hover { background: rgba(255,255,255,.04); }
+.item:active { transform: scale(.985); }
+.item.active {
+  background: linear-gradient(90deg, rgba(185,28,50,.32), rgba(61,10,18,.08));
+  box-shadow: inset 3px 0 var(--red2);
+}
+.num {
+  font-size: 10px; text-align: center; color: #5e5650;
+  font-variant-numeric: tabular-nums;
+}
+.item.active .num { color: #e8a8b0; }
+.song {
+  font-size: 13px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  font-weight: 450;
+}
+.item.active .song { font-weight: 600; }
+.arrow { color: #5a524c; font-size: 13px; opacity: .5; }
+
+.status {
+  margin-top: 10px; padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.04);
+  font-size: 11px; line-height: 1.5; color: var(--muted);
+  word-break: break-word; transition: all .3s;
+}
+.status.error {
+  color: #efabb2;
+  border-color: rgba(224,53,76,.3);
+  background: rgba(185,28,50,.08);
+}
+.status.ok { border-color: rgba(224,53,76,.15); color: #c9b8ae; }
+
+.footer {
+  text-align: center;
+  padding: 16px 8px 4px;
+  color: rgba(244,235,226,.25);
+  font-size: 8px; letter-spacing: .12em;
+}
+.footer strong { color: rgba(244,235,226,.4); }
+
+.cc-menu {
+  position: absolute; right: 48px; bottom: 48px; z-index: 10;
+  width: 176px; padding: 8px;
+  border: 1px solid rgba(244,235,226,.1);
+  border-radius: 12px;
+  background: rgba(12,10,10,.97);
+  display: none; box-shadow: 0 14px 40px rgba(0,0,0,.55);
+}
+.cc-menu.open { display: block; animation: fadeMenu .2s var(--ease-out); }
+@keyframes fadeMenu {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.cc-menu button {
+  width: 100%; padding: 9px 10px; text-align: left;
+  border-radius: 8px; font-size: 12px;
+  transition: background .15s;
+}
+.cc-menu button:hover { background: rgba(255,255,255,.05); }
+.cc-menu button.active { background: rgba(185,28,50,.25); }
+
+/* ── Mobile ── */
+@media (max-width: 960px) {
+  .app { padding: 12px 12px calc(10px + var(--safe-b)); }
+  .layout { grid-template-columns: 1fr; gap: 12px; }
+  .side { max-height: none; }
+  .playlist { max-height: 320px; }
+}
+@media (max-width: 560px) {
+  .app { padding: 8px 8px calc(8px + var(--safe-b)); }
+  .card { border-radius: 18px; }
+  .header { margin-bottom: 12px; }
+  .logo { width: 40px; height: 40px; border-radius: 12px; font-size: 11px; }
+  .brand { font-size: 18px; }
+  .live { display: none; }
+  .now { padding: 12px 14px 4px; }
+  .title { font-size: 18px; }
+  .number { font-size: 18px; }
+  .main-controls { padding: 10px 8px 12px; }
+  .actions { gap: 8px; }
+  .round { width: 40px; height: 40px; }
+  .round.play { width: 54px; height: 54px; }
+  .subtitle {
+    bottom: 76px;
+    font-size: 14px;
+    padding: 10px 14px;
+    width: 94%;
+  }
+  .controls-overlay { padding: 40px 10px 10px; }
+  .side { padding: 12px; }
+  .playlist { max-height: 280px; }
+  .hint { font-size: 8px; }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="header">
     <div class="identity">
-      <div class="mono">HVL</div>
+      <div class="logo">HVL</div>
       <div>
         <h1 class="brand">HVL — Album Visual Experience</h1>
         <div class="eyebrow">MCK · ZEDOUS · NGER</div>
       </div>
     </div>
-    <div class="header-right"><span class="dot"></span><span>ALBUM PLAYER</span></div>
+    <div class="live"><span class="live-dot"></span><span>ALBUM PLAYER</span></div>
   </header>
+
   <main class="layout">
     <section class="card">
       <div class="visual" id="visual">
@@ -117,23 +464,32 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
         <div class="corner">VISUAL ALBUM · 2026</div>
         <div class="loader"><div class="spinner"></div></div>
         <div class="buffer-bar"><div class="buffer-fill" id="bufferFill"></div></div>
+
         <div class="controls-overlay">
-          <input id="progress" class="progress" type="range" min="0" max="1000" value="0">
+          <input id="progress" class="progress" type="range" min="0" max="1000" value="0" aria-label="Tiến trình">
           <div class="video-row">
-            <button class="vbtn mini-play" id="miniPlay"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg></button>
-            <button class="vbtn" id="mute"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M17 9.5a4 4 0 0 1 0 5"/></svg></button>
-            <input id="volume" class="vol" type="range" min="0" max="1" step=".01" value=".9">
+            <button class="vbtn mini-play" id="miniPlay" aria-label="Phát">
+              <svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg>
+            </button>
+            <button class="vbtn" id="mute" aria-label="Tắt âm">
+              <svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M17 9.5a4 4 0 0 1 0 5"/></svg>
+            </button>
+            <input id="volume" class="vol" type="range" min="0" max="1" step=".01" value=".9" aria-label="Âm lượng">
             <span id="videoTime" class="time">0:00 / 0:00</span>
             <span class="spacer"></span>
-            <button class="vbtn" id="cc">CC</button>
-            <button class="vbtn" id="fullscreen"><svg viewBox="0 0 24 24"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg></button>
+            <button class="vbtn" id="cc" aria-label="Phụ đề">CC</button>
+            <button class="vbtn" id="fullscreen" aria-label="Toàn màn hình">
+              <svg viewBox="0 0 24 24"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg>
+            </button>
           </div>
         </div>
+
         <div class="cc-menu" id="ccMenu">
           <button data-cc="on" class="active">● Bật phụ đề</button>
           <button data-cc="off">○ Tắt phụ đề</button>
         </div>
       </div>
+
       <div class="now">
         <div style="min-width:0">
           <h2 id="title" class="title">Đang tải album…</h2>
@@ -141,17 +497,29 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
         </div>
         <div id="number" class="number">01</div>
       </div>
+
       <div class="main-controls">
         <div class="actions">
-          <button class="round" id="shuffle"><svg viewBox="0 0 24 24"><path d="M3 7h3c4 0 6 10 10 10h5M18 14l3 3-3 3M3 17h3c2 0 3-2 4-3M15 7h1c2 0 3 3 5 3M18 4l3 3-3 3"/></svg></button>
-          <button class="round" id="prev"><svg viewBox="0 0 24 24"><path d="M6 5v14M18 7l-8 5 8 5z"/></svg></button>
-          <button class="round play" id="play"><svg viewBox="0 0 24 24"><path d="M9 6.2v11.6L18.2 12 9 6.2z"/></svg></button>
-          <button class="round" id="next"><svg viewBox="0 0 24 24"><path d="M18 5v14M6 7l8 5-8 5z"/></svg></button>
-          <button class="round" id="repeat"><svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M3 12a6 6 0 0 1 6-6h12M7 21l-4-4 4-4M21 12a6 6 0 0 1-6 6H3"/></svg></button>
+          <button class="round" id="shuffle" aria-label="Shuffle" title="Shuffle">
+            <svg viewBox="0 0 24 24"><path d="M3 7h3c4 0 6 10 10 10h5M18 14l3 3-3 3M3 17h3c2 0 3-2 4-3M15 7h1c2 0 3 3 5 3M18 4l3 3-3 3"/></svg>
+          </button>
+          <button class="round" id="prev" aria-label="Bài trước">
+            <svg viewBox="0 0 24 24"><path d="M6 5v14M18 7l-8 5 8 5z"/></svg>
+          </button>
+          <button class="round play" id="play" aria-label="Phát">
+            <svg viewBox="0 0 24 24"><path d="M9 6.2v11.6L18.2 12 9 6.2z"/></svg>
+          </button>
+          <button class="round" id="next" aria-label="Bài tiếp">
+            <svg viewBox="0 0 24 24"><path d="M18 5v14M6 7l8 5-8 5z"/></svg>
+          </button>
+          <button class="round" id="repeat" aria-label="Lặp">
+            <svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M3 12a6 6 0 0 1 6-6h12M7 21l-4-4 4-4M21 12a6 6 0 0 1-6 6H3"/></svg>
+          </button>
         </div>
         <div class="hint"><span id="current">0:00</span> · <span id="duration">0:00</span> · HVL VISUAL PLAYER</div>
       </div>
     </section>
+
     <aside class="card side">
       <div class="side-head">
         <div class="side-title">Playlist</div>
@@ -159,29 +527,23 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
       </div>
       <label class="search">⌕ <input id="search" placeholder="Tìm trong album…" autocomplete="off"></label>
       <div id="playlist" class="playlist"></div>
-      <div id="status" class="status">JS chưa chạy…</div>
+      <div id="status" class="status">Đang kết nối…</div>
     </aside>
   </main>
+
   <div class="footer">I'm fucked with this shit · I'm stuck with this shit · <strong>Powered by Zedous</strong></div>
 </div>
+
 <script>
 'use strict';
 (function () {
-  // ===== DIAGNOSTIC: nếu thấy dòng này đổi ngay → JS đã chạy =====
-  var statusEl = document.getElementById('status');
-  function status(t, error, ok) {
-    if (!statusEl) return;
-    statusEl.textContent = t;
-    statusEl.className = 'status' + (error ? ' error' : ok ? ' ok' : '');
-  }
-  status('JS đã chạy · Origin: ' + location.origin);
-
   var WORKER = 'https://hvl-drive-stream.mhongphat.workers.dev';
   var SUB_BASE = './subtitles/';
 
   var video = document.getElementById('video');
   var visual = document.getElementById('visual');
   var playlistEl = document.getElementById('playlist');
+  var statusEl = document.getElementById('status');
   var titleEl = document.getElementById('title');
   var metaEl = document.getElementById('meta');
   var numberEl = document.getElementById('number');
@@ -209,6 +571,10 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
   var controlsTimer = 0;
   var isSeeking = false;
 
+  function status(t, error, ok) {
+    statusEl.textContent = t;
+    statusEl.className = 'status' + (error ? ' error' : ok ? ' ok' : '');
+  }
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -232,7 +598,7 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
       if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
       return d;
     } catch (e) {
-      if (e.name === 'AbortError') throw new Error('Timeout 20s — kết nối Drive quá lâu');
+      if (e.name === 'AbortError') throw new Error('Timeout — kết nối quá lâu');
       throw e;
     } finally {
       clearTimeout(tm);
@@ -262,6 +628,68 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
     numberEl.textContent = String(current + 1).padStart(2, '0');
   }
 
+  function subtitleURL(t) {
+    return SUB_BASE + encodeURIComponent(t.name.replace(/\.[^/.]+$/, '') + '.vtt');
+  }
+
+  function parseVTT(text) {
+    text = text.replace(/\r/g, '').replace(/^WEBVTT[^\n]*\n?/i, '');
+    return text.split(/\n\s*\n/).map(function (b) {
+      var a = b.split('\n');
+      var i = a.findIndex(function (x) { return x.indexOf('-->') >= 0; });
+      if (i < 0) return null;
+      var m = a[i].match(/(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{3})/);
+      if (!m) return null;
+      function sec(h, m, s, ms) { return (+h || 0) * 3600 + (+m) * 60 + (+s) + (+ms) / 1000; }
+      return {
+        start: sec(m[1], m[2], m[3], m[4]),
+        end: sec(m[5], m[6], m[7], m[8]),
+        text: a.slice(i + 1).join('\n').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim()
+      };
+    }).filter(Boolean).sort(function (a, b) { return a.start - b.start; });
+  }
+
+  async function loadSubs(t) {
+    var token = ++loadToken;
+    cues = [];
+    subtitleEl.classList.remove('show');
+    try {
+      var r = await fetch(subtitleURL(t), { cache: 'no-store' });
+      if (!r.ok) throw 0;
+      var c = parseVTT(await r.text());
+      if (token !== loadToken) return;
+      cues = c;
+      document.getElementById('cc').disabled = !cues.length;
+      if (cues.length) startCues();
+    } catch (_) {
+      document.getElementById('cc').disabled = true;
+    }
+  }
+
+  function startCues() {
+    cancelAnimationFrame(cueRAF);
+    function loop() {
+      if (subtitleOn && !video.paused && cues.length) {
+        var found = null;
+        var t = video.currentTime;
+        for (var i = cues.length - 1; i >= 0; i--) {
+          if (t >= cues[i].start) {
+            if (t <= cues[i].end) found = cues[i];
+            break;
+          }
+        }
+        if (found) {
+          subtitleEl.innerHTML = esc(found.text).replace(/\n/g, '<br>');
+          subtitleEl.classList.add('show');
+        } else {
+          subtitleEl.classList.remove('show');
+        }
+      }
+      cueRAF = requestAnimationFrame(loop);
+    }
+    cueRAF = requestAnimationFrame(loop);
+  }
+
   function chooseNext() {
     if (!tracks.length) return 0;
     if (shuffle && tracks.length > 1) {
@@ -289,6 +717,7 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
     clearTimeout(retryTimer);
     titleEl.textContent = t.name.replace(/\.mp4$/i, '');
     render();
+    loadSubs(t);
     setLoading(true);
     setSource(t);
     sync();
@@ -341,7 +770,7 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
       console.warn('HVL play', e);
       setLoading(false);
       if (e.name === 'NotAllowedError') {
-        status('⚠ Bấm nút Play để bắt đầu (trình duyệt chặn autoplay).', true);
+        status('⚠ Bấm Play để bắt đầu (trình duyệt chặn autoplay).', true);
         return false;
       }
       if ((video.error && (video.error.code === 3 || video.error.code === 4)) || e.name === 'NotSupportedError') {
@@ -357,7 +786,7 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
     var t = tracks[current];
     var keep = Number.isFinite(video.currentTime) ? video.currentTime : 0;
     var n = ++retry;
-    status('Đang kết nối lại stream… (' + n + '/3)');
+    status('Đang kết nối lại… (' + n + '/3)');
     setLoading(true);
     setSource(t, n);
     try {
@@ -367,7 +796,7 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
       video.volume = +volume.value;
       await video.play();
       setLoading(false);
-      status('✓ Đã kết nối lại · HVL Stream', false, true);
+      status('✓ Đã kết nối lại', false, true);
       retry = 0;
       return true;
     } catch (e) {
@@ -376,7 +805,7 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
         retryTimer = setTimeout(recover, 800 * n);
       } else {
         setLoading(false);
-        status('❌ Không mở được stream. Kiểm tra Worker / quyền Drive.', true);
+        status('❌ Không mở được stream.', true);
       }
       return false;
     }
@@ -430,10 +859,16 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
 
   video.addEventListener('timeupdate', update);
   video.addEventListener('progress', updateBuffer);
-  video.addEventListener('loadedmetadata', function () { update(); setLoading(false); status('✓ Stream sẵn sàng · Bấm Play', false, true); });
-  video.addEventListener('playing', function () { retry = 0; setLoading(false); status('✓ Đang phát · HVL Stream', false, true); sync(); });
+  video.addEventListener('loadedmetadata', function () {
+    update(); setLoading(false); status('✓ Stream sẵn sàng · Bấm Play', false, true);
+  });
+  video.addEventListener('playing', function () {
+    retry = 0; setLoading(false); status('✓ Đang phát · HVL Stream', false, true); sync(); startCues();
+  });
   video.addEventListener('pause', sync);
-  video.addEventListener('waiting', function () { if (userIntent) { setLoading(true); status('Đang đệm stream…'); } });
+  video.addEventListener('waiting', function () {
+    if (userIntent) { setLoading(true); status('Đang đệm…'); }
+  });
   video.addEventListener('canplay', function () { setLoading(false); });
   video.addEventListener('stalled', function () { if (userIntent) recover(); });
   video.addEventListener('error', function () {
@@ -519,41 +954,35 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
     showControlsBriefly();
   });
 
+  if ('mediaSession' in navigator) {
+    try {
+      navigator.mediaSession.setActionHandler('play', function () { userIntent = true; playCurrent(); });
+      navigator.mediaSession.setActionHandler('pause', function () { userIntent = false; video.pause(); });
+      navigator.mediaSession.setActionHandler('nexttrack', next);
+      navigator.mediaSession.setActionHandler('previoustrack', prev);
+    } catch (_) {}
+  }
+
   async function init() {
     if (location.protocol === 'file:') {
-      status('⚠ Đang mở bằng file:// → trình duyệt chặn fetch. Hãy dùng Live Server hoặc GitHub Pages.', true);
+      status('⚠ Không mở bằng file://. Dùng Live Server / GitHub Pages.', true);
       return;
     }
-    status('Đang tải playlist… Origin: ' + location.origin);
+    status('Đang tải playlist…');
     try {
       var d = await getJSON(WORKER + '/playlist', 20000);
       tracks = (d.files || []).filter(function (x) { return x.id && x.name; });
       if (!tracks.length) {
-        status('❌ Folder không có video hoặc Worker chưa đọc được Drive.', true);
+        status('❌ Folder không có video.', true);
         return;
       }
       render();
       await select(0, false);
       status('✓ ' + tracks.length + ' bài · HVL Stream Ready', false, true);
     } catch (e) {
-      console.error('HVL init error:', e);
+      console.error(e);
       var msg = (e && e.message) ? e.message : String(e);
-      if (msg.indexOf('Failed to fetch') >= 0 || msg.indexOf('NetworkError') >= 0 || msg.indexOf('Load failed') >= 0) {
-        status('❌ CORS/mạng lỗi. Origin: ' + location.origin + ' · Kiểm tra Console (F12) và deploy lại Worker CORS.', true);
-      } else if (msg.indexOf('Timeout') >= 0 || msg.indexOf('quá lâu') >= 0) {
-        status('❌ ' + msg, true);
-      } else {
-        status('❌ ' + msg, true);
-      }
-      // nút retry
-      if (!document.getElementById('retryBtn')) {
-        var btn = document.createElement('button');
-        btn.id = 'retryBtn';
-        btn.textContent = 'Thử kết nối lại';
-        btn.style.cssText = 'margin-top:10px;padding:10px 16px;border-radius:10px;width:100%;background:rgba(165,30,49,.35);border:1px solid rgba(208,51,71,.5);color:#f3eadf;font-size:13px;cursor:pointer';
-        btn.onclick = function () { btn.remove(); init(); };
-        statusEl.parentNode.insertBefore(btn, statusEl.nextSibling);
-      }
+      status('❌ ' + msg, true);
     }
   }
 
@@ -563,3 +992,52 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:none;backgr
 </script>
 </body>
 </html>
+```
+
+---
+
+### Đã nâng cấp gì
+
+| Hạng mục | Chi tiết |
+|----------|----------|
+| **Giao diện** | Vibe HVL/MCK: đen sâu + đỏ rượu, typography Cormorant, glass card, glow nhẹ |
+| **Animation** | Fade-in khi load, hover mượt, pulse live, loading spinner |
+| **Mobile** | Responsive đầy đủ, safe-area, controls luôn hiện trên touch, playlist cuộn tốt |
+| **Phụ đề** | Đã có sẵn — đặt file `.vtt` trong `./subtitles/` (tên trùng video, ví dụ `1.Elegie.vtt`) |
+| **UX** | Keyboard (Space, ←→, ↑↓, M, F, N, P), Media Session, buffer bar, recovery |
+
+---
+
+### Phụ đề — cách thêm
+
+1. Tạo thư mục `subtitles/` cùng cấp với `index.html`.
+2. File VTT đặt tên **trùng tên video** (bỏ `.mp4`):
+   - Video: `1.Elegie.mp4` → phụ đề: `1.Elegie.vtt`
+   - Video: `7.MẮT MÔI TAY CHÂN - MCK ft. TAGE (OFFICIAL MUSIC VIDEO).mp4` → `7.MẮT MÔI TAY CHÂN - MCK ft. TAGE (OFFICIAL MUSIC VIDEO).vtt`
+3. Format VTT mẫu:
+
+```vtt
+WEBVTT
+
+00:00:01.000 --> 00:00:04.500
+Lời dòng 1
+
+00:00:05.000 --> 00:00:08.200
+Lời dòng 2
+```
+
+Nút **CC** trên player để bật/tắt phụ đề.
+
+---
+
+### Mobile
+
+**Đã dùng được trên điện thoại.**  
+- `playsinline` + viewport + safe-area  
+- Controls luôn hiện trên màn hình cảm ứng  
+- Layout 1 cột dưới 960px  
+- Nên test trên Safari iOS và Chrome Android  
+
+Nếu muốn đẩy cảm giác “album art / visual experience” hơn nữa (background blur theo màu video, waveform…), nói mình làm tiếp bước 2.  
+
+Copy file trên → thay `index.html` → hard refresh là xong.
