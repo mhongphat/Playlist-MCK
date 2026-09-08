@@ -872,24 +872,61 @@ if ('mediaSession' in navigator) {
 
 async function init() {
   if (location.protocol === 'file:') {
-    status('⚠ Không mở bằng file://. Hãy dùng GitHub Pages hoặc live server.', true);
+    status('⚠ Không mở bằng file://. Dùng Live Server hoặc GitHub Pages.', true);
     return;
   }
+
+  status('Đang tải playlist từ Google Drive…');
+
   try {
-    status('Đang tải playlist từ Google Drive…');
-    const d = await getJSON(WORKER + '/playlist');
+    const d = await getJSON(WORKER + '/playlist', 20000);
     tracks = (d.files || []).filter(x => x.id && x.name);
+
     if (!tracks.length) {
       status('❌ Folder không có video hoặc Worker chưa đọc được Drive.', true);
       return;
     }
+
     render();
     await select(0, false);
     status('✓ ' + tracks.length + ' bài · HVL Stream Ready', false, true);
   } catch (e) {
-    console.error(e);
-    status('❌ ' + e.message, true);
+    console.error('HVL init error:', e);
+    const msg = e.message || String(e);
+
+    // Phân loại lỗi rõ ràng
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('Load failed')) {
+      status(
+        '❌ CORS / mạng lỗi. Origin hiện tại: ' + location.origin +
+        ' · Hãy deploy lại Worker với CORS linh hoạt hoặc mở đúng domain.',
+        true
+      );
+    } else if (msg.includes('quá lâu') || msg.includes('Abort')) {
+      status('❌ Kết nối Google Drive quá lâu. Thử lại sau.', true);
+    } else {
+      status('❌ ' + msg, true);
+    }
+
+    // Hiện nút thử lại
+    showRetryButton();
   }
+}
+
+function showRetryButton() {
+  if (document.getElementById('retryBtn')) return;
+  const btn = document.createElement('button');
+  btn.id = 'retryBtn';
+  btn.textContent = 'Thử kết nối lại';
+  btn.style.cssText = `
+    margin-top:10px;padding:10px 16px;border-radius:10px;width:100%;
+    background:rgba(165,30,49,.35);border:1px solid rgba(208,51,71,.5);
+    color:var(--cream);font-size:13px;cursor:pointer;
+  `;
+  btn.onclick = () => {
+    btn.remove();
+    init();
+  };
+  statusEl.after(btn);
 }
 
 setVolume(0.9);
