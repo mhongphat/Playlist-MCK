@@ -1,595 +1,72 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070707">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>HVL — Album Visual Experience </title>
+<title>HVL — Album Visual Experience</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600&display=swap');
-:root{--bg:#060606;--surface:#11100f;--surface2:#181313;--wine:#430b15;--red:#a51e31;--red2:#d03347;--cream:#f3eadf;--cream2:#d8cdc1;--muted:#8e837c;--line:rgba(243,234,223,.105);--soft:rgba(243,234,223,.055)}
-*{box-sizing:border-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}html,body{margin:0;min-height:100%;background:var(--bg)}body{color:var(--cream);font-family:"Be Vietnam Pro","Noto Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:radial-gradient(800px 600px at 12% -10%,rgba(165,30,49,.26),transparent 62%),radial-gradient(900px 700px at 95% 90%,rgba(67,11,21,.32),transparent 62%),linear-gradient(135deg,#060606 0%,#100d0d 48%,#070707 100%)}button,input{font:inherit}.app{width:min(1480px,100%);margin:auto;padding:30px 30px 18px}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.identity{display:flex;align-items:center;gap:14px}.monogram{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:12px;font-weight:900;letter-spacing:.12em;background:linear-gradient(145deg,var(--red2),var(--wine));box-shadow:0 18px 45px rgba(165,30,49,.24),inset 0 1px rgba(255,255,255,.18)}.brand-title{font:600 26px/1 "Cormorant Garamond","Noto Serif",Georgia,serif;margin:0}.eyebrow{margin-top:5px;color:var(--muted);font-size:9px;letter-spacing:.2em}.header-right{display:flex;align-items:center;gap:9px}.status-dot{width:7px;height:7px;border-radius:50%;background:#b52238;box-shadow:0 0 13px #b52238}.header-label{font-size:9px;letter-spacing:.16em;color:#b9aaa1}
-.shell{display:grid;grid-template-columns:minmax(0,1fr) 405px;gap:21px}.card{border:1px solid var(--line);border-radius:25px;overflow:hidden;background:linear-gradient(145deg,rgba(28,22,22,.88),rgba(9,9,9,.94));box-shadow:0 35px 110px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.025);backdrop-filter:blur(20px)}
-.visual{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;--sub-bottom:82px}.visual:before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.22),transparent 25%,transparent 66%,rgba(0,0,0,.62))}.visual video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;opacity:0;transition:opacity .72s cubic-bezier(.22,.8,.24,1)}.visual video.active{opacity:1}.visual-badge{position:absolute;z-index:12;top:16px;left:16px;padding:8px 11px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(0,0,0,.46);backdrop-filter:blur(12px);font-size:8px;letter-spacing:.18em;color:#e4d9cf}.corner{position:absolute;z-index:12;right:17px;bottom:15px;color:rgba(255,255,255,.4);font-size:8px;letter-spacing:.18em}
-.subtitle-layer{position:absolute;z-index:10;left:50%;bottom:var(--sub-bottom);width:min(88%,900px);transform:translateX(-50%);display:flex;justify-content:center;pointer-events:none;text-align:center}.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;max-width:100%;padding:9px 16px 10px;border-radius:10px;background:rgba(5,5,5,.70);border:1px solid rgba(243,234,223,.09);box-shadow:0 8px 30px rgba(0,0,0,.38);color:var(--cream);font-size:clamp(14px,1.65vw,21px);font-weight:600;line-height:1.38;letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transform:translateY(7px);transition:opacity .22s ease,transform .22s ease}.subtitle.show{opacity:1;transform:translateY(0)}.subtitle.empty{display:none}
-.video-ui{position:absolute;z-index:13;left:0;right:0;bottom:0;padding:58px 18px 14px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.28) 35%,rgba(0,0,0,.9) 100%)}
-.video-progress{display:block;width:100%;height:4px;margin:0 0 11px;appearance:none;-webkit-appearance:none;border-radius:99px;outline:none;background:linear-gradient(90deg,var(--red2) 0,var(--red2) var(--video-value,0%),rgba(255,255,255,.24) var(--video-value,0%),rgba(255,255,255,.24) 100%);cursor:pointer}.video-progress::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--cream);box-shadow:0 0 0 4px rgba(208,51,71,.2)}.video-progress::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--cream)}
-.video-buttons{display:flex;align-items:center;gap:9px}.vbtn{width:35px;height:33px;border:1px solid rgba(243,234,223,.08);border-radius:10px;background:rgba(8,8,8,.52);color:var(--cream);cursor:pointer;display:grid;place-items:center;transition:transform .18s,background .18s,border .18s,box-shadow .18s}.vbtn:hover{background:rgba(165,30,49,.2);border-color:rgba(208,51,71,.3);transform:translateY(-1px)}.vbtn.active{color:#ff9aa5;background:rgba(165,30,49,.32);border-color:rgba(208,51,71,.55);box-shadow:0 5px 20px rgba(165,30,49,.18)}.vbtn.available{color:#ffdce0}.vtime{font-size:10px;color:rgba(243,234,223,.72);margin:0 4px;white-space:nowrap;font-variant-numeric:tabular-nums}.vspacer{flex:1}.volume-mini{display:flex;align-items:center;gap:6px}.volume-mini input{width:76px}
-.cc-menu{position:absolute;right:54px;bottom:49px;z-index:20;width:205px;padding:8px;border:1px solid rgba(243,234,223,.12);border-radius:13px;background:rgba(16,13,13,.96);box-shadow:0 20px 60px rgba(0,0,0,.5);backdrop-filter:blur(18px);display:none}.cc-menu.open{display:block}.cc-title{padding:8px 9px 7px;font-size:9px;letter-spacing:.16em;color:var(--muted)}.cc-option{width:100%;border:0;background:transparent;color:var(--cream);text-align:left;padding:9px;border-radius:9px;font-size:11px;cursor:pointer}.cc-option:hover{background:rgba(255,255,255,.06)}.cc-option.selected{background:rgba(165,30,49,.24);color:#ffdce0}.cc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red2);margin-right:7px;opacity:0}.cc-option.selected .cc-dot{opacity:1}
-.now{padding:21px 23px 6px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end}.now-title{min-width:0}.now-title h2{margin:0;font:600 clamp(21px,2.3vw,29px)/1.12 "Cormorant Garamond","Noto Serif",Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.now-title p{margin:8px 0 0;color:var(--muted);font-size:11px}.track-number{color:rgba(242,233,223,.3);font:600 30px "Cormorant Garamond","Noto Serif",Georgia,serif;white-space:nowrap}
-.controls{padding:16px 22px 20px;border-top:1px solid rgba(243,234,223,.045);background:linear-gradient(180deg,rgba(255,255,255,.012),rgba(0,0,0,.08))}.actions{display:flex;justify-content:center;align-items:center;gap:11px;margin:0}.btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(243,234,223,.11);background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));cursor:pointer;transition:transform .2s ease,background .2s ease,border .2s ease,box-shadow .2s ease;color:var(--cream);display:grid;place-items:center;font-size:14px;box-shadow:0 7px 20px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.035)}.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.09);border-color:rgba(243,234,223,.2)}.btn:active{transform:scale(.95)}.btn.active{background:linear-gradient(145deg,rgba(165,30,49,.45),rgba(67,11,21,.65));border-color:rgba(208,51,71,.62);box-shadow:0 8px 24px rgba(165,30,49,.2)}.btn span{display:block;line-height:1}.play-btn{width:62px;height:62px;border:0;background:linear-gradient(145deg,#d63b52,#7e1425 72%);box-shadow:0 13px 34px rgba(165,30,49,.38),inset 0 1px rgba(255,255,255,.18);font-size:18px}.play-btn:hover{background:linear-gradient(145deg,#e1485d,#8d172b);transform:translateY(-2px)}.mode-btn{font-size:17px}.control-hint{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;color:rgba(243,234,223,.42);font-size:9px;letter-spacing:.08em;font-variant-numeric:tabular-nums}.hint-dot{width:3px;height:3px;border-radius:50%;background:var(--red2);box-shadow:0 0 8px rgba(208,51,71,.5)}.hint-label{margin-left:5px;color:rgba(243,234,223,.24);font-size:8px;letter-spacing:.16em}
-.side{padding:18px;display:flex;flex-direction:column;min-height:0}.side-top{display:flex;justify-content:space-between;align-items:center}.side-title{font:600 21px "Cormorant Garamond","Noto Serif",Georgia,serif;margin:0}.count{font-size:9px;letter-spacing:.12em;color:var(--muted)}.search{display:flex;align-items:center;gap:9px;margin:14px 0 10px;padding:0 12px;height:41px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.028)}.search-icon{color:var(--muted);font-size:15px}.search input{width:100%;border:0;outline:0;background:transparent;color:var(--cream);font-size:12px}.playlist{overflow:auto;min-height:150px;max-height:calc(100vh - 315px);padding-right:3px}.playlist::-webkit-scrollbar{width:4px}.playlist::-webkit-scrollbar-thumb{background:#ffffff18;border-radius:10px}.item{display:grid;grid-template-columns:32px minmax(0,1fr) 16px;gap:8px;align-items:center;padding:10px 9px;margin:3px 0;border-radius:11px;cursor:pointer;transition:.18s}.item:hover{background:rgba(255,255,255,.045)}.item.active{background:linear-gradient(90deg,rgba(165,30,49,.31),rgba(67,11,21,.08));box-shadow:inset 2px 0 var(--red2);border:1px solid rgba(208,51,71,.14)}.num{text-align:center;color:#6e6560;font-size:9px}.active .num{color:#e1a1a8}.song{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.arrow{color:#665d58}.source-status{margin-top:12px;padding:10px 11px;border-radius:11px;background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.05);color:var(--muted);font-size:10px;line-height:1.5}.source-status.error{color:#efabb2;background:rgba(165,30,49,.08);border-color:rgba(208,51,71,.24)}.source-status.ok{color:#c7bcb4;border-color:rgba(208,51,71,.12)}
-.footer{width:100%;display:flex;justify-content:center;align-items:center;text-align:center;padding:24px 12px 7px;color:rgba(243,234,223,.34);font-size:9px;font-weight:400;letter-spacing:.13em;line-height:1.6}.footer:before,.footer:after{content:"";height:1px;width:clamp(30px,7vw,100px);background:linear-gradient(90deg,transparent,rgba(243,234,223,.12));margin:0 14px}.footer:after{background:linear-gradient(90deg,rgba(243,234,223,.12),transparent)}.footer strong{font-weight:500;color:rgba(243,234,223,.48)}
-@media(max-width:930px){.app{padding:15px}.shell{grid-template-columns:1fr}.playlist{max-height:390px}.header{margin-bottom:15px}}
-@media(max-width:560px){.app{padding:10px 10px 5px}.card{border-radius:18px}.monogram{width:42px;height:42px;border-radius:13px}.brand-title{font-size:20px}.eyebrow{font-size:7px}.header-right{display:none}.now{padding:15px 15px 5px}.now-title h2{font-size:21px}.track-number{font-size:22px}.controls{padding:13px 10px 15px}.actions{gap:8px}.btn{width:39px;height:39px}.play-btn{width:53px;height:53px}.control-hint{font-size:8px;margin-top:8px}.hint-label{display:none}.side{padding:14px}.playlist{max-height:370px}.footer{padding-top:18px;font-size:8px;letter-spacing:.08em}.footer:before,.footer:after{width:22px;margin:0 8px}.subtitle-layer{width:92%;bottom:68px}.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;font-size:14px;padding:7px 11px 8px;border-radius:8px;line-height:1.32}.video-ui{padding:45px 9px 9px}.video-progress{height:3px;margin-bottom:8px}.vbtn{width:30px;height:29px;font-size:11px}.volume-mini input{width:54px}.vtime{font-size:8px;margin:0 2px}.cc-menu{right:40px;bottom:43px;width:185px}}
-
-/* HVL V3 polish + background playback resilience */
-html{background:#060606;scroll-behavior:smooth}
-body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
-button,input{touch-action:manipulation}
-.visual{isolation:isolate}
-.visual video{will-change:opacity;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.video-ui{transition:opacity .25s ease;opacity:.92}
-.visual:hover .video-ui,.visual:focus-within .video-ui{opacity:1}
-.video-progress{height:5px;transition:height .16s ease}
-.video-progress:hover,.video-progress:active{height:7px}
-.video-buttons{min-height:34px}
-.vbtn{flex:0 0 auto;user-select:none;-webkit-user-select:none}
-.vbtn:focus-visible,.btn:focus-visible,.cc-option:focus-visible{outline:2px solid rgba(208,51,71,.72);outline-offset:2px}
-.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;will-change:opacity,transform}
-.play-btn{position:relative;overflow:hidden}
-.play-btn:after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.14),transparent 65%);transform:translateX(-70%) rotate(8deg);transition:transform .7s ease;pointer-events:none}
-.play-btn:hover:after{transform:translateX(70%) rotate(8deg)}
-.item{user-select:none;-webkit-user-select:none}
-.item.active .song:before{content:"";display:inline-block;width:5px;height:5px;margin:0 7px 2px 0;border-radius:50%;background:var(--red2);box-shadow:0 0 10px rgba(208,51,71,.75)}
-.connection-pill{display:inline-flex;align-items:center;gap:7px;margin-top:8px;font-size:8px;letter-spacing:.1em;color:rgba(243,234,223,.35)}
-.connection-pill .dot{width:5px;height:5px;border-radius:50%;background:#777;transition:.2s}
-.connection-pill.online .dot{background:#d03347;box-shadow:0 0 10px rgba(208,51,71,.7)}
-.connection-pill.offline .dot{background:#8b6a6a}
-@media(max-width:560px){.video-ui{padding:48px 10px 10px}.video-progress{height:4px}.video-progress:hover,.video-progress:active{height:5px}.video-buttons{gap:6px}.vbtn{width:32px;height:31px;border-radius:9px}.volume-mini input{width:58px}.subtitle-layer{bottom:72px}.subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;max-width:94%;font-weight:600}.item{padding:11px 8px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-
-
-
-/* ===================== HVL V4 — CINEMATIC CONTROL LAYER ===================== */
-.visual{--ui-hide-delay:2600ms}
-.video-ui{opacity:0;visibility:hidden;transform:translateY(8px);pointer-events:none;transition:opacity .24s ease,transform .24s ease,visibility .24s ease}
-.visual:hover .video-ui,.visual:focus-within .video-ui,.visual.ui-controls .video-ui{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
-/* Desktop: controls appear only while the pointer is over the visual. */
-@media(min-width:561px){.visual:not(:hover):not(:focus-within) .video-ui{opacity:0;visibility:hidden;pointer-events:none}}
-.video-ui:before{content:"";position:absolute;left:14px;right:14px;bottom:8px;height:1px;background:rgba(243,234,223,.06);pointer-events:none}
-.video-progress{height:3px;margin:0 0 10px;box-shadow:0 0 0 1px rgba(255,255,255,.025)}
-.video-progress:hover,.video-progress:active{height:5px}
-.video-progress::-webkit-slider-thumb{width:10px;height:10px;box-shadow:0 0 0 3px rgba(208,51,71,.18),0 2px 10px rgba(0,0,0,.45);transition:transform .16s ease}
-.video-progress:hover::-webkit-slider-thumb{transform:scale(1.15)}
-.video-progress::-moz-range-thumb{width:10px;height:10px;box-shadow:0 0 0 3px rgba(208,51,71,.18),0 2px 10px rgba(0,0,0,.45)}
-.video-buttons{gap:7px}
-.vbtn{width:31px;height:30px;border-radius:9px;font-size:10px;background:rgba(7,7,7,.62);box-shadow:0 5px 16px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.045)}
-.vbtn:hover{transform:translateY(-1px) scale(1.025)}
-.vbtn svg{width:13px;height:13px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.vbtn.play-mini svg{fill:currentColor;stroke:none}
-.volume-mini{height:30px;gap:7px;padding:0 3px}
-.volume-mini input{width:58px;height:12px;appearance:none;-webkit-appearance:none;background:transparent;cursor:pointer}
-.volume-mini input::-webkit-slider-runnable-track{height:2px;border-radius:99px;background:linear-gradient(90deg,var(--cream) 0,var(--cream) var(--vol-value,90%),rgba(255,255,255,.18) var(--vol-value,90%),rgba(255,255,255,.18) 100%)}
-.volume-mini input::-moz-range-track{height:2px;border-radius:99px;background:rgba(255,255,255,.18)}
-.volume-mini input::-moz-range-progress{height:2px;border-radius:99px;background:var(--cream)}
-.volume-mini input::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:8px;margin-top:-3px;border-radius:50%;background:var(--cream);box-shadow:0 0 0 2px rgba(208,51,71,.15)}
-.volume-mini input::-moz-range-thumb{width:8px;height:8px;border:0;border-radius:50%;background:var(--cream);box-shadow:0 0 0 2px rgba(208,51,71,.15)}
-.vtime{font-size:9px;opacity:.72;margin-left:2px}
-.controls{padding-top:18px}
-.actions{gap:12px}
-.btn{width:43px;height:43px;box-shadow:0 9px 25px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.045)}
-.play-btn{width:60px;height:60px}
-.btn svg{width:15px;height:15px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.play-btn svg{width:19px;height:19px;display:block;color:var(--cream);fill:currentColor;stroke:none}.play-btn svg.pause-icon{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
-.mode-btn{font-size:0}
-.now{padding-top:20px}
-.track-number{font-variant-numeric:tabular-nums}
-.search:focus-within{border-color:rgba(208,51,71,.34);box-shadow:0 0 0 3px rgba(165,30,49,.08)}
-.item{transition:background .22s ease,transform .22s ease,border .22s ease,box-shadow .22s ease}
-.item:hover{transform:translateX(2px)}
-.item.active{transform:none}
-.connection-pill{transition:opacity .2s ease}
-
-@media(max-width:560px){
-  .visual{touch-action:manipulation;--ui-hide-delay:3200ms}
-  .video-ui{padding:48px 10px 10px}
-  .video-buttons{gap:5px}
-  .vbtn{width:31px;height:30px}
-  .volume-mini input{width:52px}
-  .vtime{font-size:8px}
-  .visual.ui-controls .video-ui{opacity:1;visibility:visible;pointer-events:auto}
-  .visual:not(.ui-controls) .video-ui{opacity:0;visibility:hidden;pointer-events:none}
-  .subtitle-layer{bottom:70px}
-  .subtitle{font-family:"Be Vietnam Pro","Noto Sans",sans-serif;font-size:14px}
-  .controls{padding:14px 9px 15px}
-  .actions{gap:7px}
-  .btn{width:39px;height:39px}
-  .play-btn{width:54px;height:54px}
-}
-
-@media(max-width:380px){
-  .vtime{display:none}
-  .volume-mini input{width:45px}
-  .actions{gap:5px}
-  .btn{width:37px;height:37px}
-  .play-btn{width:51px;height:51px}
-}
-
-@media(hover:none){
-  .visual:hover .video-ui{opacity:inherit;visibility:inherit}
-}
-
-
-/* ===================== HVL V6 — PLAYBACK ENGINE POLISH ===================== */
-.play-btn{color:var(--cream)!important}.play-btn svg{color:var(--cream)!important}
-.video-ui{contain:layout paint}.visual video{contain:strict}
-.loading-sheen{position:absolute;inset:0;z-index:11;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(208,51,71,.07),transparent 38%);opacity:0;transition:opacity .25s ease}.visual.buffering .loading-sheen{opacity:1}
-@media(max-width:560px){.visual video{object-fit:contain}.subtitle{font-size:clamp(13px,3.8vw,16px)}}
-
-/* HVL V7 — stable mobile playback */
-.visual.mobile-single #videoB{display:none}
-.visual.mobile-single #videoA{opacity:1}
-.loading-item{pointer-events:none;opacity:.82}.skeleton-line{display:block;width:72%;height:9px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.14),rgba(255,255,255,.06));background-size:220% 100%;animation:hvlSkeleton 1.25s ease-in-out infinite}@keyframes hvlSkeleton{0%{background-position:120% 0}100%{background-position:-120% 0}}
-.visual.buffering .loading-sheen{animation:hvlPulse 1.4s ease-in-out infinite}
-@keyframes hvlPulse{0%,100%{opacity:.35}50%{opacity:1}}
-@media(max-width:700px){
-  .video-ui{padding-bottom:10px}
-  .visual{--sub-bottom:74px}
-  .subtitle{font-size:clamp(13px,4vw,16px)}
-}
+:root{--bg:#060606;--card:#11100f;--card2:#181313;--wine:#430b15;--red:#a51e31;--red2:#d03347;--cream:#f3eadf;--muted:#8e837c;--line:rgba(243,234,223,.105)}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased}html,body{margin:0;min-height:100%;background:var(--bg)}body{color:var(--cream);font-family:"Be Vietnam Pro",Arial,sans-serif;background:radial-gradient(900px 650px at 10% -10%,rgba(165,30,49,.24),transparent 60%),radial-gradient(900px 700px at 100% 100%,rgba(67,11,21,.3),transparent 60%),#060606}button,input{font:inherit}.app{width:min(1480px,100%);margin:auto;padding:28px 28px 16px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.identity{display:flex;align-items:center;gap:14px}.mono{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:12px;font-weight:900;letter-spacing:.12em;background:linear-gradient(145deg,var(--red2),var(--wine));box-shadow:0 18px 45px rgba(165,30,49,.25)}.brand{font:600 27px/1 "Cormorant Garamond",Georgia,serif;margin:0}.eyebrow{font-size:9px;color:var(--muted);letter-spacing:.2em;margin-top:5px}.header-right{font-size:9px;letter-spacing:.15em;color:#b9aaa1;display:flex;gap:8px;align-items:center}.dot{width:7px;height:7px;border-radius:50%;background:var(--red2);box-shadow:0 0 12px rgba(208,51,71,.8)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 405px;gap:20px}.card{border:1px solid var(--line);border-radius:25px;overflow:hidden;background:linear-gradient(145deg,rgba(28,22,22,.9),rgba(9,9,9,.96));box-shadow:0 35px 110px rgba(0,0,0,.58);backdrop-filter:blur(20px)}.visual{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden}.visual video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.2),transparent 30%,transparent 65%,rgba(0,0,0,.72))}.badge,.corner{position:absolute;z-index:3;font-size:8px;letter-spacing:.17em;color:#e4d9cf}.badge{top:15px;left:15px;padding:8px 11px;border:1px solid rgba(255,255,255,.12);border-radius:99px;background:rgba(0,0,0,.45);backdrop-filter:blur(10px)}.corner{right:16px;bottom:15px;color:rgba(255,255,255,.4)}.subtitle{position:absolute;z-index:4;left:50%;bottom:78px;transform:translateX(-50%);width:min(90%,900px);padding:9px 15px;border-radius:10px;text-align:center;background:rgba(0,0,0,.7);border:1px solid rgba(243,234,223,.09);font-size:clamp(14px,1.6vw,21px);font-weight:600;line-height:1.38;opacity:0;transition:.2s}.subtitle.show{opacity:1}.controls-overlay{position:absolute;z-index:5;left:0;right:0;bottom:0;padding:58px 17px 13px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.9))}.progress{width:100%;height:4px;appearance:none;background:linear-gradient(90deg,var(--red2) 0,var(--red2) var(--p,0%),rgba(255,255,255,.22) var(--p,0%),rgba(255,255,255,.22) 100%);border-radius:99px;cursor:pointer}.progress::-webkit-slider-thumb{appearance:none;width:11px;height:11px;border-radius:50%;background:var(--cream)}.video-row{display:flex;align-items:center;gap:7px;margin-top:9px}.vbtn{width:32px;height:31px;border:1px solid rgba(243,234,223,.1);border-radius:9px;background:rgba(5,5,5,.58);color:var(--cream);display:grid;place-items:center;cursor:pointer}.vbtn:hover,.vbtn.active{background:rgba(165,30,49,.3);border-color:rgba(208,51,71,.5)}.vbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.mini-play svg{fill:currentColor;stroke:none}.vol{width:60px}.time{font-size:9px;color:rgba(243,234,223,.7);white-space:nowrap}.spacer{flex:1}.now{padding:20px 22px 7px;display:flex;justify-content:space-between;align-items:end;gap:15px}.title{font:600 clamp(22px,2.4vw,30px)/1.1 "Cormorant Garamond",Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}.meta{font-size:10px;color:var(--muted);margin:7px 0 0}.number{font:600 30px "Cormorant Garamond",Georgia,serif;color:rgba(243,234,223,.28)}.main-controls{padding:15px 22px 20px;border-top:1px solid rgba(243,234,223,.05)}.actions{display:flex;justify-content:center;gap:11px}.round{width:44px;height:44px;border-radius:50%;border:1px solid rgba(243,234,223,.11);background:rgba(255,255,255,.035);color:var(--cream);display:grid;place-items:center;cursor:pointer}.round svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.round.active{background:rgba(165,30,49,.42);border-color:rgba(208,51,71,.6)}.round.play{width:61px;height:61px;background:linear-gradient(145deg,#d63b52,#7e1425);border:0;box-shadow:0 13px 34px rgba(165,30,49,.35)}.round.play svg{width:20px;height:20px;fill:currentColor;stroke:none}.hint{text-align:center;margin-top:9px;color:rgba(243,234,223,.4);font-size:8px;letter-spacing:.1em}.side{padding:18px;display:flex;flex-direction:column}.side-head{display:flex;justify-content:space-between;align-items:center}.side-title{font:600 22px "Cormorant Garamond",Georgia,serif}.count{font-size:9px;letter-spacing:.12em;color:var(--muted)}.search{height:41px;margin:13px 0 10px;padding:0 12px;border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;background:rgba(255,255,255,.025)}.search input{width:100%;border:0;outline:0;background:transparent;color:var(--cream);font-size:12px}.playlist{overflow:auto;max-height:calc(100vh - 315px);padding-right:3px}.item{display:grid;grid-template-columns:32px minmax(0,1fr) 16px;gap:8px;align-items:center;padding:10px 9px;margin:3px 0;border-radius:11px;cursor:pointer}.item:hover{background:rgba(255,255,255,.045)}.item.active{background:linear-gradient(90deg,rgba(165,30,49,.32),rgba(67,11,21,.08));box-shadow:inset 2px 0 var(--red2)}.num{font-size:9px;text-align:center;color:#6e6560}.active .num{color:#e1a1a8}.song{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.arrow{color:#665d58}.status{margin-top:11px;padding:10px 11px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);font-size:10px;line-height:1.5;color:var(--muted)}.status.error{color:#efabb2;border-color:rgba(208,51,71,.3);background:rgba(165,30,49,.08)}.status.ok{border-color:rgba(208,51,71,.16)}.footer{text-align:center;padding:23px 8px 6px;color:rgba(243,234,223,.33);font-size:8px;letter-spacing:.12em}.cc-menu{position:absolute;right:53px;bottom:47px;z-index:8;width:190px;padding:8px;border:1px solid rgba(243,234,223,.12);border-radius:12px;background:rgba(16,13,13,.97);display:none}.cc-menu.open{display:block}.cc-menu button{width:100%;border:0;background:transparent;color:var(--cream);padding:9px;text-align:left;border-radius:8px;font-size:11px;cursor:pointer}.cc-menu button.active{background:rgba(165,30,49,.25)}@media(max-width:930px){.app{padding:15px}.layout{grid-template-columns:1fr}.playlist{max-height:390px}}@media(max-width:560px){.app{padding:9px}.card{border-radius:18px}.header{margin-bottom:13px}.mono{width:42px;height:42px;border-radius:13px}.brand{font-size:21px}.header-right{display:none}.now{padding:15px 15px 6px}.title{font-size:22px}.number{font-size:22px}.main-controls{padding:13px 10px 15px}.actions{gap:7px}.round{width:39px;height:39px}.round.play{width:54px;height:54px}.subtitle{bottom:70px;width:92%;font-size:14px;padding:7px 10px}.controls-overlay{padding:47px 9px 9px}.video-row{gap:5px}.vbtn{width:31px;height:30px}.vol{width:53px}.time{font-size:8px}.side{padding:14px}.playlist{max-height:370px}.footer{padding-top:18px}.cc-menu{right:40px;bottom:43px;width:180px}}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="identity"><div class="monogram">HVL</div><div><h1 class="brand-title">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER</div></div></div><div class="header-right"><span class="status-dot"></span><span class="header-label">ALBUM PLAYER</span></div></header>
-<main class="shell">
+<header class="header"><div class="identity"><div class="mono">HVL</div><div><h1 class="brand">HVL — Album Visual Experience</h1><div class="eyebrow">MCK · ZEDOUS · NGER</div></div></div><div class="header-right"><span class="dot"></span><span>ALBUM PLAYER</span></div></header>
+<main class="layout">
 <section class="card">
 <div class="visual" id="visual">
-<div class="loading-sheen" aria-hidden="true"></div>
-<span class="visual-badge">HVL / NOW PLAYING</span>
-<video id="videoA" class="active" playsinline preload="metadata"></video>
-<video id="videoB" playsinline preload="metadata"></video>
-<div class="subtitle-layer" aria-live="polite"><div id="subtitle" class="subtitle"></div></div>
-<div class="video-ui">
-<input id="videoProgress" class="video-progress" type="range" min="0" max="100" value="0" aria-label="Tiến trình video">
-<div class="video-buttons">
-<button class="vbtn play-mini" id="videoPlay" title="Phát / Tạm dừng" aria-label="Phát / Tạm dừng"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg></button>
-<button class="vbtn" id="videoMute" title="Tắt âm" aria-label="Tắt âm"><svg id="muteIcon" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M17 9.5a4 4 0 0 1 0 5"/></svg></button>
-<div class="volume-mini"><input id="videoVolume" type="range" min="0" max="1" step=".01" value=".9" aria-label="Âm lượng"></div>
-<span class="vtime" id="videoTime">0:00 / 0:00</span><div class="vspacer"></div>
-<button class="vbtn" id="ccButton" title="Phụ đề" aria-label="Phụ đề">CC</button>
-<button class="vbtn" id="fullscreenButton" title="Toàn màn hình" aria-label="Toàn màn hình"><svg viewBox="0 0 24 24"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg></button>
+<video id="video" playsinline webkit-playsinline preload="metadata" crossorigin="anonymous"></video><div class="shade"></div><div class="badge">HVL / NOW PLAYING</div><div id="subtitle" class="subtitle"></div><div class="corner">VISUAL ALBUM · 2026</div>
+<div class="controls-overlay"><input id="progress" class="progress" type="range" min="0" max="100" value="0" aria-label="Tiến trình"><div class="video-row"><button class="vbtn mini-play" id="miniPlay" aria-label="Phát"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg></button><button class="vbtn" id="mute" aria-label="Tắt âm"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4z"/><path d="M17 9.5a4 4 0 0 1 0 5"/></svg></button><input id="volume" class="vol" type="range" min="0" max="1" step=".01" value=".9" aria-label="Âm lượng"><span id="videoTime" class="time">0:00 / 0:00</span><span class="spacer"></span><button class="vbtn" id="cc" aria-label="Phụ đề">CC</button><button class="vbtn" id="fullscreen" aria-label="Toàn màn hình"><svg viewBox="0 0 24 24"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg></button></div></div>
+<div class="cc-menu" id="ccMenu"><button data-cc="on" class="active">● Bật phụ đề</button><button data-cc="off">○ Tắt phụ đề</button></div>
 </div>
-</div>
-<div class="cc-menu" id="ccMenu"><div class="cc-title">SUBTITLES</div><button class="cc-option selected" data-sub="on"><span class="cc-dot"></span>Bật phụ đề</button><button class="cc-option" data-sub="off"><span class="cc-dot"></span>Tắt phụ đề</button></div>
-<span class="corner">VISUAL ALBUM · 2026</span>
-</div>
-<div class="now"><div class="now-title"><h2 id="title">Đang tải album…</h2><p id="meta">HVL Album · —</p></div><div class="track-number" id="trackNumber">01</div></div>
-<div class="controls"><div class="actions">
-<button class="btn mode-btn" id="shuffle" title="Shuffle" aria-label="Shuffle"><svg viewBox="0 0 24 24"><path d="M3 7h3c4 0 6 10 10 10h5"/><path d="M18 14l3 3-3 3"/><path d="M3 17h3c1.8 0 3-1.3 4-3"/><path d="M15 7h1c2 0 3 3 5 3h0"/><path d="M18 4l3 3-3 3"/></svg></button>
-<button class="btn" id="prev" title="Previous" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5v14M18 7l-8 5 8 5z"/></svg></button>
-<button class="btn play-btn" id="play" title="Play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M9 6v12l9-6z"/></svg></button>
-<button class="btn" id="next" title="Next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M18 5v14M6 7l8 5-8 5z"/></svg></button>
-<button class="btn mode-btn" id="repeat" title="Repeat" aria-label="Repeat"><svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4"/><path d="M3 12a6 6 0 0 1 6-6h12M7 21l-4-4 4-4"/><path d="M21 12a6 6 0 0 1-6 6H3"/></svg></button>
-</div><div class="control-hint"><span id="current">0:00</span><span class="hint-dot"></span><span id="duration">0:00</span><span class="hint-label">HVL VISUAL PLAYER</span></div></div>
+<div class="now"><div style="min-width:0"><h2 id="title" class="title">Đang tải album…</h2><p id="meta" class="meta">HVL Album · —</p></div><div id="number" class="number">01</div></div>
+<div class="main-controls"><div class="actions"><button class="round" id="shuffle" aria-label="Shuffle"><svg viewBox="0 0 24 24"><path d="M3 7h3c4 0 6 10 10 10h5M18 14l3 3-3 3M3 17h3c2 0 3-2 4-3M15 7h1c2 0 3 3 5 3M18 4l3 3-3 3"/></svg></button><button class="round" id="prev" aria-label="Bài trước"><svg viewBox="0 0 24 24"><path d="M6 5v14M18 7l-8 5 8 5z"/></svg></button><button class="round play" id="play" aria-label="Phát"><svg viewBox="0 0 24 24"><path d="M9 6.2v11.6L18.2 12 9 6.2z"/></svg></button><button class="round" id="next" aria-label="Bài tiếp"><svg viewBox="0 0 24 24"><path d="M18 5v14M6 7l8 5-8 5z"/></svg></button><button class="round" id="repeat" aria-label="Lặp"><svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M3 12a6 6 0 0 1 6-6h12M7 21l-4-4 4-4M21 12a6 6 0 0 1-6 6H3"/></svg></button></div><div class="hint"><span id="current">0:00</span> · <span id="duration">0:00</span> · HVL VISUAL PLAYER</div></div>
 </section>
-<aside class="card side"><div class="side-top"><h2 class="side-title">Playlist</h2><span class="count" id="count">0 TRACKS</span></div><div class="search"><span class="search-icon">⌕</span><input id="search" placeholder="Tìm trong album…"></div><div class="playlist" id="playlist"></div><div class="source-status" id="status">Đang kết nối với Google Drive…</div><div class="connection-pill online" id="connectionPill"><span class="dot"></span><span id="connectionText">ONLINE · STREAM READY</span></div></aside>
-</main>
-<div class="footer">I'm fucked with this shit&nbsp; • &nbsp;I'm stuck with this shit&nbsp; • &nbsp;<strong>Powered by Zedous</strong></div>
+<aside class="card side"><div class="side-head"><div class="side-title">Playlist</div><div id="count" class="count">0 TRACKS</div></div><label class="search">⌕ <input id="search" placeholder="Tìm trong album…" autocomplete="off"></label><div id="playlist" class="playlist"></div><div id="status" class="status">Đang kết nối HVL Stream…</div></aside>
+</main><div class="footer">I'm fucked with this shit · I'm stuck with this shit · <strong>Powered by Zedous</strong></div>
 </div>
 <script>
-
-const FOLDER_ID = "1ckf_j0cc-87VPG186w2Ilm003pt0ifjR";
-const WORKER_BASE = "https://hvl-drive-stream.mhongphat.workers.dev";
-const SUBTITLE_BASE = "./subtitles/";
-const SUBTITLE_EXT = ".vtt";
-/* ========================================================== */
-const A=document.getElementById("videoA"),B=document.getElementById("videoB");
-const statusEl=document.getElementById("status"),subtitleEl=document.getElementById("subtitle"),visual=document.getElementById("visual");
-const volume=document.getElementById("videoVolume");
-const videoProgress=document.getElementById("videoProgress"),videoPlay=document.getElementById("videoPlay"),videoMute=document.getElementById("videoMute"),videoVolume=document.getElementById("videoVolume"),videoTime=document.getElementById("videoTime"),ccButton=document.getElementById("ccButton"),ccMenu=document.getElementById("ccMenu"),fullscreenButton=document.getElementById("fullscreenButton");
-const MOBILE_BREAKPOINT=700;
-const isMobile=()=>window.matchMedia(`(max-width:${MOBILE_BREAKPOINT}px)`).matches;
-visual.classList.toggle("mobile-single",isMobile());
-window.addEventListener("resize",()=>visual.classList.toggle("mobile-single",isMobile()),{passive:true});
-A.controls=false; B.controls=false;
-let tracks=[],current=0,active=A,buffer=B,shuffle=false,repeat=false,transitioning=false;
-let userWantsPlayback=false, intentionalPause=false, resumeTimer=null, crossfadeToken=0;
-let subtitles=[],subtitleEnabled=true,subtitleRAF=null,subtitleLoadToken=0;
-function setStatus(text,error=false,state=""){statusEl.textContent=text;statusEl.className="source-status"+(error?" error":state?" "+state:"")}
-function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function fmt(v){return Number.isFinite(v)?Math.floor(v/60)+":"+String(Math.floor(v%60)).padStart(2,"0"):"0:00"}
-function mediaURL(id){return WORKER_BASE.replace(/\/$/,"")+"/stream/"+encodeURIComponent(id)}
-function subtitleURL(track){if(!track||!track.name)return "";const filename=track.name.replace(/\.[^/.]+$/,'')+SUBTITLE_EXT;return SUBTITLE_BASE+encodeURIComponent(filename)}
-function parseVTT(text){const clean=text.replace(/\r/g,"").replace(/^WEBVTT[^\n]*\n?/i,"");const blocks=clean.split(/\n\s*\n/);const cues=[];for(const block of blocks){const lines=block.split("\n").map(x=>x.trimEnd());if(!lines.length)continue;const timeIndex=lines.findIndex(line=>line.includes("-->"));if(timeIndex<0)continue;const timing=lines[timeIndex];const m=timing.match(/(\d{1,2}:)?(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(\d{1,2}:)?(\d{2}):(\d{2})[.,](\d{3})/);if(!m)continue;const toSec=(h,mi,se,ms)=>Number(h?h.replace(":",""):0)*3600+Number(mi)*60+Number(se)+Number(ms)/1000;const start=toSec(m[1],m[2],m[3],m[4]);const end=toSec(m[5],m[6],m[7],m[8]);const cueText=lines.slice(timeIndex+1).join("\n").replace(/<br\s*\/?\>/gi,"\n").replace(/<[^>]+>/g,"").trim();if(cueText)cues.push({start,end,text:cueText})}return cues.sort((a,b)=>a.start-b.start)}
-async function loadSubtitles(track){const token=++subtitleLoadToken;subtitles=[];subtitleEl.textContent="";subtitleEl.classList.remove("show");const url=subtitleURL(track);if(!url){setSubtitleStatus(false);return}try{const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("HTTP "+response.status);const text=await response.text();if(token!==subtitleLoadToken)return;subtitles=parseVTT(text);if(subtitles.length){setSubtitleStatus(true);startSubtitleLoop()}else setSubtitleStatus(false)}catch(err){if(token!==subtitleLoadToken)return;subtitles=[];subtitleEl.textContent="";subtitleEl.classList.remove("show");setSubtitleStatus(false);console.info("Không có phụ đề cho:",track.name)}}
-function setSubtitleStatus(has){ccButton.classList.toggle("available",has);ccButton.title=has?(subtitleEnabled?"Phụ đề: Bật":"Phụ đề: Tắt"):"Chưa có file phụ đề .vtt"}
-function startSubtitleLoop(){if(subtitleRAF)cancelAnimationFrame(subtitleRAF);const tick=()=>{if(active&&!active.paused&&subtitles.length){const t=active.currentTime;let cue=null;for(let i=subtitles.length-1;i>=0;i--){if(t>=subtitles[i].start){if(t<=subtitles[i].end)cue=subtitles[i];break}}renderSubtitle(cue)}subtitleRAF=requestAnimationFrame(tick)};subtitleRAF=requestAnimationFrame(tick)}
-function renderSubtitle(cue){if(!subtitleEnabled||!cue){subtitleEl.classList.remove("show");return}const wanted=cue.text.replace(/\n/g,"<br>");if(subtitleEl.innerHTML!==wanted){subtitleEl.classList.remove("show");requestAnimationFrame(()=>{subtitleEl.innerHTML=wanted;subtitleEl.classList.add("show")})}else subtitleEl.classList.add("show")}
-function toggleSubtitles(enabled){subtitleEnabled=enabled;document.querySelectorAll(".cc-option").forEach(btn=>btn.classList.toggle("selected",btn.dataset.sub===(enabled?"on":"off")));ccButton.classList.toggle("active",enabled);ccButton.title=enabled?"Tắt phụ đề":"Bật phụ đề";if(!enabled)subtitleEl.classList.remove("show")}
-function render(){const q=document.getElementById("search").value.trim().toLowerCase(),box=document.getElementById("playlist");box.innerHTML="";tracks.forEach((t,i)=>{if(q&&!t.name.toLowerCase().includes(q))return;const el=document.createElement("div");el.className="item"+(i===current?" active":"");el.innerHTML='<div class="num">'+String(i+1).padStart(2,"0")+'</div><div class="song">'+esc(t.name)+'</div><div class="arrow">›</div>';el.onclick=()=>selectTrack(i,true);box.appendChild(el)});document.getElementById("count").textContent=tracks.length+" TRACKS";document.getElementById("meta").textContent="HVL Album · "+(tracks.length?current+1:0)+" / "+tracks.length;document.getElementById("trackNumber").textContent=String(tracks.length?current+1:1).padStart(2,"0");if(window._setMediaSession)window._setMediaSession()}
-function isMobilePlayback(){return isMobile()}
-function trackKey(track){return track ? String(track.id) : ""}
-function bufferedAhead(video){
-  if(!video || !Number.isFinite(video.currentTime)) return 0;
-  try{
-    for(let i=0;i<video.buffered.length;i++){
-      const s=video.buffered.start(i),e=video.buffered.end(i);
-      if(video.currentTime>=s && video.currentTime<=e) return Math.max(0,e-video.currentTime);
-    }
-  }catch(e){}
-  return 0;
+'use strict';
+const WORKER='https://hvl-drive-stream.mhongphat.workers.dev';
+const SUB_BASE='./subtitles/';
+const video=document.getElementById('video'),visual=document.getElementById('visual'),playlistEl=document.getElementById('playlist'),statusEl=document.getElementById('status'),titleEl=document.getElementById('title'),metaEl=document.getElementById('meta'),numberEl=document.getElementById('number'),countEl=document.getElementById('count'),progress=document.getElementById('progress'),volume=document.getElementById('volume'),videoTime=document.getElementById('videoTime'),currentEl=document.getElementById('current'),durationEl=document.getElementById('duration'),subtitleEl=document.getElementById('subtitle'),ccMenu=document.getElementById('ccMenu');
+let tracks=[],current=0,shuffle=false,repeat=false,userIntent=false,retry=0,retryTimer=0,subtitleOn=true,cues=[],cueRAF=0,loadToken=0;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>Number.isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
+function status(t,error=false,ok=false){statusEl.textContent=t;statusEl.className='status'+(error?' error':ok?' ok':'')}
+function streamURL(id,nonce=0){return WORKER+'/stream/'+encodeURIComponent(id)+(nonce?'?retry='+nonce:'')}
+function isMobile(){return matchMedia('(max-width:700px)').matches}
+async function getJSON(url,timeout=15000){const c=new AbortController(),tm=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});let d={};try{d=await r.json()}catch(_){}if(!r.ok)throw Error(d.error||('HTTP '+r.status));return d}catch(e){if(e.name==='AbortError')throw Error('Kết nối Google Drive quá lâu.')}finally{clearTimeout(tm)}}
+function render(){const q=document.getElementById('search').value.trim().toLocaleLowerCase('vi');playlistEl.innerHTML='';tracks.forEach((t,i)=>{if(q&&!t.name.toLocaleLowerCase('vi').includes(q))return;const x=document.createElement('button');x.className='item'+(i===current?' active':'');x.innerHTML='<span class="num">'+String(i+1).padStart(2,'0')+'</span><span class="song">'+esc(t.name.replace(/\.mp4$/i,''))+'</span><span class="arrow">›</span>';x.onclick=()=>select(i,true);playlistEl.appendChild(x)});countEl.textContent=tracks.length+' TRACKS';metaEl.textContent='HVL Album · '+(tracks.length?current+1:0)+' / '+tracks.length;numberEl.textContent=String(current+1).padStart(2,'0');setMedia()}
+function subtitleURL(t){const base=t.name.replace(/\.[^/.]+$/,'')+'.vtt';return SUB_BASE+encodeURIComponent(base)}
+function parseVTT(text){text=text.replace(/\r/g,'').replace(/^WEBVTT[^\n]*\n?/i,'');return text.split(/\n\s*\n/).map(b=>{const a=b.split('\n'),i=a.findIndex(x=>x.includes('-->'));if(i<0)return null;const m=a[i].match(/(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{3})/);if(!m)return null;const sec=(h,m,s,ms)=>(+h||0)*3600+(+m)*60+(+s)+(+ms)/1000;return{start:sec(m[1],m[2],m[3],m[4]),end:sec(m[5],m[6],m[7],m[8]),text:a.slice(i+1).join('\n').replace(/<br\s*\/?\>/gi,'\n').replace(/<[^>]+>/g,'').trim()}}).filter(Boolean).sort((a,b)=>a.start-b.start)}
+async function loadSubs(t){const token=++loadToken;cues=[];subtitleEl.classList.remove('show');try{const r=await fetch(subtitleURL(t),{cache:'no-store'});if(!r.ok)throw 0;const c=parseVTT(await r.text());if(token!==loadToken)return;cues=c;document.getElementById('cc').disabled=!cues.length;if(cues.length)startCues()}catch(_){document.getElementById('cc').disabled=true}}
+function startCues(){cancelAnimationFrame(cueRAF);const loop=()=>{if(subtitleOn&&!video.paused&&cues.length){let found=null,t=video.currentTime;for(let i=cues.length-1;i>=0;i--){if(t>=cues[i].start){if(t<=cues[i].end)found=cues[i];break}}if(found){subtitleEl.innerHTML=esc(found.text).replace(/\n/g,'<br>');subtitleEl.classList.add('show')}else subtitleEl.classList.remove('show')}cueRAF=requestAnimationFrame(loop)};cueRAF=requestAnimationFrame(loop)}
+function chooseNext(){if(!tracks.length)return 0;if(shuffle&&tracks.length>1){let n;do n=Math.floor(Math.random()*tracks.length);while(n===current);return n}return(current+1)%tracks.length}
+function setSource(t,nonce=0){video.pause();video.removeAttribute('src');video.load();video.src=streamURL(t.id,nonce);video.preload='metadata';video.load();}
+async function select(i,play=false){if(!tracks.length)return;current=Math.max(0,Math.min(i,tracks.length-1));const t=tracks[current];retry=0;clearTimeout(retryTimer);titleEl.textContent=t.name.replace(/\.mp4$/i,'');render();loadSubs(t);setSource(t);sync();status(play?'Đang mở video…':'✓ Sẵn sàng · Bấm Play để phát',false,true);if(play){userIntent=true;await playCurrent(true)}}
+async function playCurrent(gesture=false){if(!tracks.length)return false;const t=tracks[current];userIntent=true;try{if(video.src!==streamURL(t.id)&&!video.currentSrc.includes('/stream/'))setSource(t);if(video.readyState<2)await waitPlayable(12000);video.muted=false;video.volume=+volume.value;const p=video.play();if(p)await p;retry=0;status('✓ Đang phát · HVL Stream',false,true);sync();return true}catch(e){console.warn('HVL play',e);if(e.name==='NotAllowedError'){status('⚠ Hãy bấm Play trực tiếp để bắt đầu.',true);return false}if(video.error?.code===3||video.error?.code===4||e.name==='NotSupportedError'){status('❌ Stream trả về dữ liệu video không được trình duyệt giải mã.',true);return false}return recover()}}
+function waitPlayable(ms){return new Promise((res,rej)=>{if(video.readyState>=2)return res();let done=false;const ok=()=>{if(done)return;done=true;clean();res()},bad=()=>{if(done)return;done=true;clean();rej(Error('MEDIA_ERROR'))},tm=setTimeout(()=>{if(done)return;done=true;clean();rej(Error('MEDIA_TIMEOUT'))},ms),clean=()=>{clearTimeout(tm);video.removeEventListener('canplay',ok);video.removeEventListener('loadeddata',ok);video.removeEventListener('error',bad)};video.addEventListener('canplay',ok,{once:true});video.addEventListener('loadeddata',ok,{once:true});video.addEventListener('error',bad,{once:true})})}
+async function recover(){if(!userIntent||retry>=3)return false;const t=tracks[current],keep=Number.isFinite(video.currentTime)?video.currentTime:0;const n=++retry;status('Đang kết nối lại stream… ('+n+'/3)');setSource(t,n);try{await waitPlayable(12000);if(keep>0&&Number.isFinite(video.duration)&&keep<video.duration)video.currentTime=keep;video.muted=false;video.volume=+volume.value;await video.play();status('✓ Đã kết nối lại · HVL Stream',false,true);retry=0;return true}catch(e){if(n<3){clearTimeout(retryTimer);retryTimer=setTimeout(recover,900*n)}else status('❌ Không thể mở stream. Kiểm tra Worker/Google Drive.',true);return false}}
+function sync(){const playing=!video.paused;document.getElementById('play').innerHTML=document.getElementById('miniPlay').innerHTML=playing?'<svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"><path d="M8 6v12M16 6v12"/></svg>':'<svg viewBox="0 0 24 24"><path d="M9 6.2v11.6L18.2 12 9 6.2z"/></svg>';document.getElementById('play').setAttribute('aria-label',playing?'Tạm dừng':'Phát')}
+function togglePlay(){if(video.paused){userIntent=true;playCurrent(true)}else{userIntent=false;video.pause();sync()}}
+function next(){if(!tracks.length)return;select(chooseNext(),true)}
+function prev(){if(video.currentTime>5){video.currentTime=0;return}select((current-1+tracks.length)%tracks.length,true)}
+function setVolume(v){v=Math.max(0,Math.min(1,+v));video.volume=v;video.muted=v===0;volume.value=v;document.getElementById('mute').classList.toggle('active',v===0)}
+function update(){const d=video.duration;if(Number.isFinite(d)&&d>0){const p=video.currentTime/d*100;progress.value=p;progress.style.setProperty('--p',p+'%');currentEl.textContent=fmt(video.currentTime);durationEl.textContent=fmt(d);videoTime.textContent=fmt(video.currentTime)+' / '+fmt(d)}else{videoTime.textContent=fmt(video.currentTime)+' / 0:00'}
 }
-let bufferTrackId="";
-let preloadToken=0;
-let bufferReady=false;
-function clearVideo(video){
-  try{video.pause()}catch(e){}
-  video.removeAttribute("src");
-  video.load();
-  video.dataset.trackId="";
-}
-function loadInto(video,track,force=false,retryNonce=0){
-  if(!track)return false;
-  const isBuffer=video===buffer;
-  const key=trackKey(track);
-  if(isBuffer && !force && bufferTrackId===key && video.src)return true;
-  if(!isBuffer && !force && video.dataset.trackId===key && video.src)return true;
-  clearVideo(video);
-  video.dataset.trackId=key;
-  if(isBuffer) bufferTrackId=key;
-  const base=mediaURL(track.id);
-  video.src=retryNonce ? base + (base.includes('?')?'&':'?') + 'retry=' + retryNonce : base;
-  video.preload=isBuffer ? 'metadata' : 'auto';
-  video.playsInline=true;
-  video.setAttribute('playsinline','');
-  video.setAttribute('webkit-playsinline','');
-  video.muted=isBuffer;
-  video.volume=isBuffer?0:Number(volume.value);
-  video.load();
-  return true;
-}
-function getNext(){
-  if(!tracks.length)return 0;
-  if(shuffle&&tracks.length>1){let n=current;while(n===current)n=Math.floor(Math.random()*tracks.length);return n}
-  return(current+1)%tracks.length
-}
-function preload(force=false){
-  if(isMobilePlayback())return;
-  if(!tracks.length)return;
-  const next=tracks[getNext()],key=trackKey(next);
-  if(!force&&bufferTrackId===key&&buffer.src)return;
-  const token=++preloadToken;
-  bufferReady=false;
-  loadInto(buffer,next,force);
-  const onReady=()=>{if(token!==preloadToken||bufferTrackId!==key)return;bufferReady=true;buffer.dataset.preloaded='1';console.debug('HVL preload ready:',next.name)};
-  buffer.addEventListener('canplay',onReady,{once:true});
-  buffer.addEventListener('loadeddata',()=>{if(token===preloadToken&&bufferTrackId===key)bufferReady=true},{once:true});
-}
-function bufferIsUsable(track){return !!track&&bufferTrackId===trackKey(track)&&!!buffer.src&&buffer.readyState>=2}
-
-let recoveryAttempts=0,recoveryTimer=null,recoveryBusy=false;
-function resetRecovery(){recoveryAttempts=0;clearTimeout(recoveryTimer);recoveryBusy=false}
-function mediaErrorLabel(v){const c=v?.error?.code;return c===1?'ABORTED':c===2?'NETWORK':c===3?'DECODE':c===4?'SRC_NOT_SUPPORTED':'UNKNOWN'}
-async function recoverStream(reason='error'){
-  if(!userWantsPlayback||intentionalPause||!active||transitioning||recoveryBusy)return false;
-  if(recoveryAttempts>=3)return false;
-  recoveryBusy=true;
-  const track=tracks[current];
-  if(!track){recoveryBusy=false;return false}
-  const keepTime=Number.isFinite(active.currentTime)?active.currentTime:0;
-  const attempt=++recoveryAttempts;
-  setStatus(`Đang kết nối lại stream… (${attempt}/3)`,false);
-  console.warn('[HVL stream recovery]',{reason,attempt,track:track.name,time:keepTime,error:mediaErrorLabel(active)});
-  try{active.pause()}catch(e){}
-  try{
-    loadInto(active,track,true,attempt);
-    await waitForPlayable(active,9000);
-    if(keepTime>0 && Number.isFinite(active.duration) && keepTime<active.duration-0.5){try{active.currentTime=keepTime}catch(e){}}
-    active.muted=false;active.volume=Number(volume.value);
-    await active.play();
-    resetRecovery();
-    userWantsPlayback=true;intentionalPause=false;
-    visual.classList.remove('buffering');
-    setStatus('✓ Đã kết nối lại · HVL Stream',false,'ok');
-    syncPlayButtons();startSubtitleLoop();
-    if(!isMobilePlayback())preload(false);
-    return true;
-  }catch(err){
-    recoveryBusy=false;
-    console.warn('[HVL stream recovery failed]',{attempt,name:err?.name,message:err?.message,error:mediaErrorLabel(active)});
-    if(recoveryAttempts<3){
-      const delay=900*attempt;
-      clearTimeout(recoveryTimer);
-      recoveryTimer=setTimeout(()=>recoverStream('retry'),delay);
-      return false;
-    }
-    setStatus('❌ Stream không ổn định. Hãy thử Play lại hoặc đổi bài.',true);
-    return false;
-  }
-}
-async function playActive(opts={}){
-  const fromGesture=!!opts.fromGesture;
-  if(!active)return false;
-  const track=tracks[current];if(!track)return false;
-  if(fromGesture){userWantsPlayback=true;intentionalPause=false;resetRecovery()}
-  if(!active.src||active.dataset.trackId!==trackKey(track))loadInto(active,track,true);
-  try{
-    active.muted=false;active.volume=Number(volume.value);
-    if(active.readyState<2)await waitForPlayable(active,10000);
-    const p=active.play();if(p&&typeof p.then==='function')await p;
-    if(active.paused)throw new Error('PLAY_DID_NOT_START');
-    userWantsPlayback=true;intentionalPause=false;resetRecovery();
-    visual.classList.remove('buffering');syncPlayButtons();startSubtitleLoop();
-    setStatus('✓ Đang phát · HVL Stream',false,'ok');
-    if(navigator.mediaSession)navigator.mediaSession.playbackState='playing';
-    if(!isMobilePlayback())preload(false);
-    return true;
-  }catch(err){
-    console.error('[HVL playback]',{name:err?.name,message:err?.message,mediaError:active.error?.code,readyState:active.readyState,networkState:active.networkState,src:active.currentSrc});
-    if(err?.name==='NotAllowedError')setStatus('⚠ Hãy bấm Play trực tiếp một lần để bắt đầu.',true);
-    else if(active.error?.code===3||err?.name==='NotSupportedError'||active.error?.code===4)setStatus('❌ Video không giải mã được hoặc định dạng không được hỗ trợ.',true);
-    else if(err?.message==='PLAY_DID_NOT_START')setStatus('⚠ Video chưa sẵn sàng. Hãy bấm Play lại.',true);
-    else if(userWantsPlayback&&!fromGesture)recoverStream('play-error');
-    else setStatus('❌ Không thể phát stream. Hãy thử Play lại.',true);
-    syncPlayButtons();return false;
-  }
-}
-function waitForPlayable(video,timeout=10000){
-  return new Promise((resolve,reject)=>{
-    if(!video)return reject(new Error('VIDEO_ELEMENT_MISSING'));
-    if(video.readyState>=2)return resolve();
-    let done=false;
-    const cleanup=()=>{clearTimeout(timer);video.removeEventListener('loadeddata',ready);video.removeEventListener('canplay',ready);video.removeEventListener('error',failed)};
-    const finish=fn=>{if(done)return;done=true;cleanup();fn()};
-    const ready=()=>finish(resolve);const failed=()=>finish(()=>reject(new Error('MEDIA_LOAD_ERROR')));
-    const timer=setTimeout(()=>finish(()=>reject(new Error('MEDIA_LOAD_TIMEOUT'))),timeout);
-    video.addEventListener('loadeddata',ready,{once:true});video.addEventListener('canplay',ready,{once:true});video.addEventListener('error',failed,{once:true});
-  });
-}
-function selectTrack(index, shouldPlay=false){
-  if(!tracks.length)return;
-  const n=Math.max(0,Math.min(tracks.length-1,index));
-  const track=tracks[n];
-  if(!track)return;
-
-  // Cancel any previous transition/preload promotion.
-  crossfadeToken++;
-  transitioning=false;
-  preloadToken++;
-  clearTimeout(waitingTimer);
-  visual.classList.remove("buffering");
-
-  // A manual track selection should never leave the old hidden stream alive.
-  try{buffer.pause()}catch(e){}
-  clearVideo(buffer);
-  buffer.dataset.trackId="";
-  bufferTrackId="";
-
-  current=n;
-  document.getElementById("title").textContent=track.name;
-  render();
-  loadSubtitles(track);
-
-  // Reuse the currently visible media element for the selected track.
-  active.pause();
-  active.dataset.trackId="";
-  loadInto(active,track,true);
-  active.classList.add("active");
-  active.muted=false;
-  active.volume=Number(volume.value);
-  syncPlayButtons();
-  setStatus(shouldPlay?"Đang mở video…":"✓ Sẵn sàng · Bấm Play để phát",false,"ok");
-
-  if(shouldPlay){
-    userWantsPlayback=true;
-    intentionalPause=false;
-    // Calling play from a click is a user gesture and is therefore the safest
-    // point to request playback on Safari/iOS.
-    playActive({fromGesture:true}).then(()=>{
-      if(isMobilePlayback())setTimeout(()=>preload(false),700); else preload(false);
-    });
-  }else{
-    userWantsPlayback=false;
-    intentionalPause=false;
-    // Metadata-only initial state: avoid opening two large Drive streams before the user plays.
-    if(!isMobilePlayback() && shouldPlay)preload(false);
-  }
-}
-
-function switchToBuffered(n,fade=false){
-  const incoming=buffer,outgoing=active,track=tracks[n];
-  if(!track || !bufferIsUsable(track)) return false;
-  const token=++crossfadeToken;
-  transitioning=true;
-  incoming.currentTime=0;
-  incoming.muted=!!fade;
-  incoming.volume=fade?0:Number(volume.value);
-  const p=incoming.play();
-  if(!p || typeof p.then!=="function") return false;
-  p.then(()=>{
-    if(token!==crossfadeToken)return;
-    incoming.classList.add("active");
-    outgoing.classList.remove("active");
-    active=incoming;buffer=outgoing;bufferTrackId="";bufferReady=false;current=n;
-    active.muted=false;active.volume=Number(volume.value);
-    document.getElementById("title").textContent=track.name;
-    render();loadSubtitles(track);userWantsPlayback=true;
-    syncPlayButtons();
-    if(fade){
-      const max=Number(volume.value),started=performance.now(),duration=520;
-      const fadeStep=now=>{
-        if(token!==crossfadeToken)return;
-        const q=Math.min(1,(now-started)/duration);
-        active.volume=max*q;outgoing.volume=max*(1-q);
-        if(q<1)requestAnimationFrame(fadeStep);else finishTransition(outgoing);
-      };
-      requestAnimationFrame(fadeStep);
-    }else finishTransition(outgoing);
-    playActive({autoTransition:true});
-  }).catch(err=>{
-    console.debug("HVL buffered promotion deferred:",err?.name||err);
-    transitioning=false;
-    incoming.pause();incoming.muted=true;incoming.volume=0;
-    setStatus("Bài kế đã chuẩn bị · đang chờ phát…",false,"ok");
-    syncPlayButtons();
-  });
-  return true;
-}
-function finishTransition(outgoing){
-  try{outgoing.pause()}catch(e){}
-  outgoing.removeAttribute("src");outgoing.load();outgoing.muted=true;outgoing.volume=0;outgoing.dataset.trackId="";
-  bufferTrackId="";bufferReady=false;transitioning=false;visual.classList.remove("buffering");
-  setTimeout(()=>preload(false),120);
-  syncPlayButtons();
-}
-function directNext(){
-  if(!tracks.length)return;
-  const n=getNext(),track=tracks[n];
-  if(!track)return;
-  // Mobile uses one visible video only. Desktop may promote the prepared buffer.
-  if(!isMobilePlayback() && bufferIsUsable(track)){
-    if(switchToBuffered(n,true))return;
-  }
-  // Last-resort fallback: load the next track on the currently visible element.
-  // This is intentionally immediate; never wait forever for a hidden buffer.
-  crossfadeToken++;transitioning=false;preloadToken++;bufferReady=false;
-  clearVideo(buffer);bufferTrackId="";
-  const outgoing=active;
-  loadInto(outgoing,track,true);
-  current=n;
-  document.getElementById("title").textContent=track.name;render();loadSubtitles(track);
-  outgoing.muted=false;outgoing.volume=Number(volume.value);userWantsPlayback=true;
-  setStatus("Đang mở bài kế…",false);
-  playActive({autoTransition:true}).then(()=>preload(false));
-}
-function crossfade(){
-  if(transitioning||!tracks.length)return;
-  if(repeat){active.currentTime=0;playActive({autoTransition:true});return}
-  const n=getNext(),next=tracks[n];
-  const ready=bufferIsUsable(next);
-  if(ready){switchToBuffered(n,isMobilePlayback()?false:true);return}
-  // On mobile, don't attempt a two-element crossfade if the next stream isn't ready.
-  // Start it immediately instead of letting the current track end into an infinite wait.
-  directNext();
-}
-function nextTrack(){if(!tracks.length)return;crossfade()}
-function previousTrack(){if(!tracks.length)return;if(active.currentTime>5){active.currentTime=0;return}selectTrack(current-1,true)}
-function togglePlay(){
-  if(active.paused){userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true,autoTransition:false})}
-  else{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false}
-}
-function toggleShuffle(){shuffle=!shuffle;document.getElementById("shuffle").classList.toggle("active",shuffle);bufferTrackId="";preload(true)}
-function toggleRepeat(){repeat=!repeat;document.getElementById("repeat").classList.toggle("active",repeat)}
-function update(){
-  if(!active.duration)return;
-  const p=active.currentTime/active.duration*100;
-  videoProgress.value=p;videoProgress.style.setProperty("--video-value",p+"%");
-  document.getElementById("current").textContent=fmt(active.currentTime);document.getElementById("duration").textContent=fmt(active.duration);videoTime.textContent=fmt(active.currentTime)+" / "+fmt(active.duration);if(navigator.mediaSession && "setPositionState" in navigator.mediaSession && active.duration>0){try{navigator.mediaSession.setPositionState({duration:active.duration,playbackRate:active.playbackRate||1,position:Math.min(active.currentTime,active.duration-0.001)})}catch(e){}}
-  // Start/refresh preloading early enough to hide Drive's range-request latency.
-  if(userWantsPlayback && active.duration-active.currentTime<=30)preload();
-}
-function syncVolume(v){const val=Math.max(0,Math.min(1,Number(v)));active.volume=val;active.muted=val===0;buffer.volume=0;buffer.muted=true;videoVolume.value=val;volume.value=val;videoVolume.style.setProperty("--vol-value",(val*100)+"%");videoMute.classList.toggle("active",val===0);videoMute.setAttribute("aria-label",val===0?"Bật âm":"Tắt âm");videoMute.title=val===0?"Bật âm":"Tắt âm"}
-videoProgress.addEventListener("input",()=>{if(active.duration)active.currentTime=Number(videoProgress.value)/100*active.duration});
-volume.addEventListener("input",()=>syncVolume(volume.value));videoVolume.addEventListener("input",()=>syncVolume(videoVolume.value));
-videoMute.addEventListener("click",()=>{if(active.volume>0){active.dataset.previousVolume=active.volume;syncVolume(0)}else syncVolume(Number(active.dataset.previousVolume||.9))});
-A.addEventListener("timeupdate",update);B.addEventListener("timeupdate",update);A.addEventListener("ended",crossfade);B.addEventListener("ended",crossfade);
-function syncPlayButtons(){
-  const playing=!active.paused,main=document.getElementById("play"),mini=document.getElementById("videoPlay");
-  const icon=playing?'<svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.2v11.6L18.2 12 9 6.2z"/></svg>';
-  main.innerHTML=icon;mini.innerHTML=icon;main.title=playing?"Tạm dừng":"Phát";mini.title=main.title;
-}
-A.addEventListener("play",()=>{if(active===A){syncPlayButtons();preload();startSubtitleLoop()}});B.addEventListener("play",()=>{if(active===B){syncPlayButtons();preload();startSubtitleLoop()}});
-A.addEventListener("pause",()=>{if(active===A){syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState="paused"}});B.addEventListener("pause",()=>{if(active===B){syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState="paused"}});
-document.getElementById("play").onclick=togglePlay;videoPlay.onclick=togglePlay;document.getElementById("next").onclick=nextTrack;document.getElementById("prev").onclick=previousTrack;document.getElementById("shuffle").onclick=toggleShuffle;document.getElementById("repeat").onclick=toggleRepeat;document.getElementById("search").oninput=render;
-ccButton.addEventListener("click",e=>{e.stopPropagation();ccMenu.classList.toggle("open")});document.querySelectorAll(".cc-option").forEach(btn=>btn.addEventListener("click",()=>{toggleSubtitles(btn.dataset.sub==="on");ccMenu.classList.remove("open")}));document.addEventListener("click",e=>{if(!ccMenu.contains(e.target)&&e.target!==ccButton)ccMenu.classList.remove("open")});
-async function toggleFullscreen(){try{if(!document.fullscreenElement){if(visual.requestFullscreen)await visual.requestFullscreen();else if(visual.webkitRequestFullscreen)visual.webkitRequestFullscreen()}else{if(document.exitFullscreen)await document.exitFullscreen()}}catch(err){try{if(active.webkitEnterFullscreen)active.webkitEnterFullscreen()}catch(_){}}}
-fullscreenButton.addEventListener("click",toggleFullscreen);document.addEventListener("fullscreenchange",()=>{fullscreenButton.textContent=document.fullscreenElement?"✕":"⛶"});
-// --- Playback resilience ---
-function scheduleResume(reason){if(!userWantsPlayback||intentionalPause||!active||transitioning)return;clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{if(!userWantsPlayback||intentionalPause||!active||!active.paused)return;playActive({autoTransition:true})},reason==="visible"?120:500)}
-function handleVisibility(){if(document.visibilityState==="visible"){if(userWantsPlayback&&active.paused)scheduleResume("visible");syncPlayButtons()}else{clearTimeout(resumeTimer)}}
-function handlePageShow(){if(userWantsPlayback&&active.paused)scheduleResume("pageshow")}
-function handleOnline(){const pill=document.getElementById("connectionPill"),text=document.getElementById("connectionText");pill.classList.add("online");pill.classList.remove("offline");text.textContent="ONLINE · STREAM READY"}
-function handleOffline(){const pill=document.getElementById("connectionPill"),text=document.getElementById("connectionText");pill.classList.remove("online");pill.classList.add("offline");text.textContent="OFFLINE · ĐANG CHỜ KẾT NỐI"}
-document.addEventListener("visibilitychange",handleVisibility);window.addEventListener("pageshow",handlePageShow);window.addEventListener("online",handleOnline);window.addEventListener("offline",handleOffline);
-let waitingTimer=null;
-[A,B].forEach(v=>{
-  v.addEventListener('pause',()=>{if(active===v){syncPlayButtons();if(document.visibilityState==='visible'&&userWantsPlayback&&!intentionalPause&&!transitioning&&!recoveryBusy)scheduleResume('visible')}});
-  v.addEventListener('waiting',()=>{if(active!==v)return;clearTimeout(waitingTimer);waitingTimer=setTimeout(()=>{if(active===v&&!v.paused){visual.classList.add('buffering');setStatus('Đang đệm stream…',false)}},650)});
-  v.addEventListener('playing',()=>{if(active===v){clearTimeout(waitingTimer);resetRecovery();visual.classList.remove('buffering');setStatus('✓ Đang phát · HVL Stream',false,'ok');syncPlayButtons();if(navigator.mediaSession)navigator.mediaSession.playbackState='playing'}});
-  v.addEventListener('canplay',()=>{if(active===v){visual.classList.remove('buffering');clearTimeout(waitingTimer)}});
-  v.addEventListener('stalled',()=>{if(active===v&&userWantsPlayback&&!intentionalPause)recoverStream('stalled')});
-  v.addEventListener('error',()=>{
-    if(active!==v)return;
-    clearTimeout(waitingTimer);visual.classList.remove('buffering');
-    const code=v.error?.code;
-    console.warn('[HVL media error]',{code,label:mediaErrorLabel(v),networkState:v.networkState,readyState:v.readyState,src:v.currentSrc});
-    if(!userWantsPlayback||intentionalPause)return;
-    if(code===3||code===4){setStatus('❌ Video không giải mã được hoặc stream không được hỗ trợ.',true);return}
-    recoverStream('media-error');
-  });
-});
-
-// --- Cinematic controls ---
-let uiHideTimer=null;
-function showVideoUI(){const v=document.getElementById("visual");if(!v)return;v.classList.add("ui-controls");clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>{if(document.activeElement&&v.contains(document.activeElement))return;if(!ccMenu.classList.contains("open"))v.classList.remove("ui-controls")},window.matchMedia("(max-width:560px)").matches?3600:3000)}
-function keepVideoUI(e){showVideoUI();if(e)e.stopPropagation()}
-visual.addEventListener("pointermove",()=>{if(window.matchMedia("(hover:hover)").matches)showVideoUI()},{passive:true});
-visual.addEventListener("pointerdown",e=>{if(window.matchMedia("(max-width:560px)").matches){if(e.target.closest("button,input,.cc-menu")){showVideoUI();return}if(!visual.classList.contains("ui-controls")){showVideoUI();return}}},{passive:true});
-visual.addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").matches&&!ccMenu.classList.contains("open")){clearTimeout(uiHideTimer);uiHideTimer=setTimeout(()=>visual.classList.remove("ui-controls"),450)}});
-[videoProgress,videoPlay,videoMute,videoVolume,ccButton,fullscreenButton].forEach(el=>el.addEventListener("pointerdown",keepVideoUI,{passive:true}));ccMenu.addEventListener("pointerdown",keepVideoUI,{passive:true});fullscreenButton.addEventListener("click",()=>setTimeout(showVideoUI,80));
-
-// Mobile/iOS user activation: remember that the page has been interacted with. Do not force autoplay.
-let pageActivated=false;
-document.addEventListener("pointerup",()=>{pageActivated=true},{once:true,passive:true});
-
-// Media Session
-if("mediaSession" in navigator){
-  const setMediaSession=()=>{
-    const t=tracks[current];if(!t)return;
-    try{
-      navigator.mediaSession.metadata=new MediaMetadata({title:t.name.replace(/\.mp4$/i,""),artist:"HVL",album:"HVL Album"});
-      navigator.mediaSession.playbackState=active&&!active.paused?"playing":"paused";
-      if("setPositionState" in navigator.mediaSession && active && Number.isFinite(active.duration) && active.duration>0){
-        try{navigator.mediaSession.setPositionState({duration:active.duration,playbackRate:active.playbackRate||1,position:Math.min(active.currentTime,Math.max(0,active.duration-0.001))})}catch(e){}
-      }
-      const safe=(name,fn)=>{try{navigator.mediaSession.setActionHandler(name,fn)}catch(e){}};
-      safe("play",()=>{userWantsPlayback=true;intentionalPause=false;playActive({fromGesture:true})});
-      safe("pause",()=>{userWantsPlayback=false;intentionalPause=true;active.pause();intentionalPause=false});
-      safe("nexttrack",nextTrack);safe("previoustrack",previousTrack);
-      safe("seekbackward",()=>{active.currentTime=Math.max(0,active.currentTime-10)});
-      safe("seekforward",()=>{active.currentTime=Math.min(active.duration||0,active.currentTime+10)});
-    }catch(e){}
-  };
-  window._setMediaSession=setMediaSession;
-}
-
-async function fetchJSON(url,opts={},timeout=12000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);try{const r=await fetch(url,{...opts,signal:controller.signal,cache:"no-store"});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error((d.error&&d.error.message)||d.message||("HTTP "+r.status));return d}catch(err){if(err.name==="AbortError")throw new Error("Google Drive phản hồi quá lâu. Hãy thử tải lại trang.");throw err}finally{clearTimeout(timer)}}
-function showLoadingPlaylist(){const box=document.getElementById("playlist");box.innerHTML=Array.from({length:6},(_,i)=>`<div class="item loading-item"><div class="num">${String(i+1).padStart(2,"0")}</div><div class="song"><span class="skeleton-line"></span></div><div class="arrow">·</div></div>`).join("")}
-async function loadPlaylist(){
-  if(location.protocol==="file:"){setStatus("⚠ Hãy mở bằng GitHub Pages hoặc localhost — không mở file:// trực tiếp.",true);return}
-  setStatus("Đang kết nối HVL Stream…");tracks=[];current=0;showLoadingPlaylist();
-  try{
-    const d=await fetchJSON(WORKER_BASE.replace(/\/$/,"")+"/playlist",{},12000);
-    const files=Array.isArray(d.files)?d.files:[];
-    tracks=files.filter(x=>x&&x.id&&x.name);
-    tracks.sort((a,b)=>a.name.localeCompare(b.name,"vi",{numeric:true,sensitivity:"base"}));
-    render();
-    if(!tracks.length){setStatus("Không tìm thấy video trong folder. Kiểm tra Worker + Google Drive.",true);return}
-    setStatus(`✓ ${tracks.length} bài · HVL Stream Ready`,false,"ok");
-    selectTrack(0,false);
-  }catch(err){
-    console.error("HVL playlist error",err);
-    render();
-    setStatus("❌ Không thể kết nối HVL Stream: "+err.message,true);
-  }
-}
-window.addEventListener("error",e=>{console.error("HVL runtime error",e.error||e.message);if(!tracks.length&&statusEl&&/kết nối|tải playlist|khởi tạo/i.test(statusEl.textContent)){setStatus("❌ Trình phát gặp lỗi khởi tạo. Hãy tải lại trang.",true)}});
-window.addEventListener("DOMContentLoaded",()=>{visual.classList.toggle("mobile-single",isMobilePlayback());toggleSubtitles(true);syncVolume(.9);setStatus("Khởi tạo HVL Player…");loadPlaylist()});
+function setMedia(){if(!('mediaSession' in navigator)||!tracks[current])return;try{navigator.mediaSession.metadata=new MediaMetadata({title:tracks[current].name.replace(/\.mp4$/i,''),artist:'HVL',album:'HVL Album'});navigator.mediaSession.playbackState=video.paused?'paused':'playing'}catch(_){} }
+video.addEventListener('timeupdate',update);video.addEventListener('loadedmetadata',()=>{update();status('✓ Stream đã nhận metadata · Bấm Play',false,true)});video.addEventListener('playing',()=>{retry=0;status('✓ Đang phát · HVL Stream',false,true);sync();setMedia();startCues()});video.addEventListener('pause',sync);video.addEventListener('waiting',()=>{if(userIntent)status('Đang đệm stream…')});video.addEventListener('stalled',()=>{if(userIntent)recover()});video.addEventListener('error',()=>{if(!userIntent)return;const c=video.error?.code;if(c===3||c===4)status('❌ Video không giải mã được. Worker phải dùng Drive API alt=media.',true);else recover()});video.addEventListener('ended',()=>{if(repeat){video.currentTime=0;playCurrent(true)}else next()});
+progress.addEventListener('input',()=>{if(Number.isFinite(video.duration))video.currentTime=+progress.value/100*video.duration});volume.addEventListener('input',()=>setVolume(volume.value));document.getElementById('mute').onclick=()=>setVolume(video.muted||video.volume===0?+(video.dataset.prev||.9):0);document.getElementById('play').onclick=togglePlay;document.getElementById('miniPlay').onclick=togglePlay;document.getElementById('next').onclick=next;document.getElementById('prev').onclick=prev;document.getElementById('shuffle').onclick=()=>{shuffle=!shuffle;document.getElementById('shuffle').classList.toggle('active',shuffle)};document.getElementById('repeat').onclick=()=>{repeat=!repeat;document.getElementById('repeat').classList.toggle('active',repeat)};document.getElementById('search').oninput=render;
+volume.addEventListener('change',()=>video.dataset.prev=volume.value);document.getElementById('cc').onclick=e=>{e.stopPropagation();ccMenu.classList.toggle('open')};document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{subtitleOn=b.dataset.cc==='on';document.querySelectorAll('[data-cc]').forEach(x=>x.classList.toggle('active',x===b));if(!subtitleOn)subtitleEl.classList.remove('show');ccMenu.classList.remove('open')});document.addEventListener('click',e=>{if(!ccMenu.contains(e.target)&&e.target.id!=='cc')ccMenu.classList.remove('open')});
+document.getElementById('fullscreen').onclick=async()=>{try{if(!document.fullscreenElement){if(visual.requestFullscreen)await visual.requestFullscreen();else if(video.webkitEnterFullscreen)video.webkitEnterFullscreen()}else await document.exitFullscreen()}catch(_){try{video.webkitEnterFullscreen()}catch(__){}}};
+if('mediaSession' in navigator){const safe=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch(_){}};safe('play',()=>{userIntent=true;playCurrent(true)});safe('pause',()=>{userIntent=false;video.pause()});safe('nexttrack',next);safe('previoustrack',prev);safe('seekbackward',()=>video.currentTime=Math.max(0,video.currentTime-10));safe('seekforward',()=>video.currentTime=Math.min(video.duration||0,video.currentTime+10))}
+async function init(){if(location.protocol==='file:'){status('⚠ Không mở index.html bằng file://. Dùng GitHub Pages.',true);return}try{status('Đang tải playlist từ Google Drive…');const d=await getJSON(WORKER+'/playlist');tracks=(d.files||[]).filter(x=>x.id&&x.name);if(!tracks.length){status('❌ Folder không có video hoặc Worker chưa đọc được Drive.',true);return}render();await select(0,false);status('✓ '+tracks.length+' bài · HVL Stream Ready',false,true)}catch(e){console.error(e);status('❌ '+e.message,true)}}
+setVolume(.9);init();
 </script>
 </body>
 </html>
