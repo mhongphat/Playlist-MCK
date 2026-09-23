@@ -60,7 +60,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   flex-direction: column;
 }
 
-/* ── Header ── */
 .header {
   display: flex;
   justify-content: space-between;
@@ -128,7 +127,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   50% { opacity: .4; transform: scale(.75); }
 }
 
-/* ── Layout ── */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 390px;
@@ -161,7 +159,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   pointer-events: none; z-index: 2;
 }
 
-/* ── Visual / Video ── */
 .visual {
   position: relative;
   aspect-ratio: 16/9;
@@ -216,7 +213,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Subtitle */
 .subtitle {
   position: absolute; z-index: 5;
   left: 50%; bottom: 90px;
@@ -250,7 +246,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   box-shadow: 0 0 8px var(--glow);
 }
 
-/* Controls overlay */
 .controls-overlay {
   position: absolute; z-index: 7; left: 0; right: 0; bottom: 0;
   padding: 58px 16px 13px;
@@ -296,7 +291,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .time { font-size: 10px; color: rgba(245,236,227,.6); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
 .spacer { flex: 1; }
 
-/* Now playing */
 .now {
   padding: 16px 22px 8px;
   display: flex; justify-content: space-between; align-items: flex-end; gap: 14px;
@@ -321,7 +315,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 }
 .number.fade { opacity: 0; }
 
-/* ── Luxury main controls ── */
 .main-controls {
   padding: 12px 20px 18px;
   border-top: 1px solid rgba(245,236,227,.04);
@@ -370,7 +363,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   color: var(--gold2);
 }
 
-/* Play button — hero luxury */
 .round.play {
   width: 64px; height: 64px;
   background: linear-gradient(145deg, #f0455c 0%, #c41e36 40%, #6a1020 100%);
@@ -402,7 +394,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   font-size: 9px; letter-spacing: .12em;
 }
 
-/* ── Side playlist ── */
 .side {
   padding: 16px;
   display: flex; flex-direction: column;
@@ -543,7 +534,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   color: var(--gold2);
 }
 
-/* ── Mobile ── */
 @media (max-width: 960px) {
   .app { padding: 12px 12px calc(10px + var(--safe-b)); }
   .layout { grid-template-columns: 1fr; gap: 12px; }
@@ -857,7 +847,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     video.load();
   }
 
-  /* Smooth track switch: fade out → load → fade in */
   async function select(i, play) {
     if (!tracks.length) return;
     if (isSwitching) return;
@@ -867,7 +856,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     fadeText(true);
     subtitleEl.classList.remove('show');
 
-    // short fade-out
     await new Promise(function (r) { setTimeout(r, 280); });
 
     current = Math.max(0, Math.min(i, tracks.length - 1));
